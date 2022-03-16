@@ -11,6 +11,7 @@
    source/slurmhelper
    spec_guidelines
    guide
+   example
 
 
 Usage

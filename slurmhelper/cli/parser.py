@@ -33,7 +33,12 @@ def build_parser():
     parser.add_argument('operation', type=str, choices=[ 'copy', 'clear', 'reset',
                                                          'prep', 'prep-array', 'list', 'check','init',
                                                          'genscripts'], action='store')
-    parser.add_argument('--cluster', type=str, default=['midway2'], choices=[ 'midway2', 'tmp'], action='store',
+    spec = parser.add_mutually_exclusive_group()
+    spec.add_argument('--spec', type=str, nargs=1, choices=['rshrfmatlab'], action='store',
+                        help='job specification to load from built-ins.')
+    spec.add_argument('--spec-file', '--spec_file', type=str, nargs=1, action='store', help='job specification yml file (if'
+                                                                                   'not implemented in main pkg)')
+    parser.add_argument('--cluster', type=str, default=['midway2-scratch'], choices=[ 'midway2-scratch', 'tmp'], action='store',
                         help='Name of the cluster preset to use. Currently, only UChicago Midway2 (run on user scratch)'
                              ' is implemented; tmp is offered as an option for debugging this pkg (to /tmp)')
     parser.add_argument('--cnet', type=str, default=[ 'fcmeyer' ], action='store',

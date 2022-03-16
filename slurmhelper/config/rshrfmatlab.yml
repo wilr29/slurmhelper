@@ -73,7 +73,7 @@ run_script: |
         ${path_matlab} \
         ${path_spm} \
         ${this_job_inputs_dir}/derivatives \
-        ${output_base_dir} \
+        ${output_base_dir}/restingstatehrf \
         ${this_job_work_dir}
 
     exit_status=$?

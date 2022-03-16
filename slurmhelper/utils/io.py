@@ -21,14 +21,15 @@ def load_db(db_file):
     '''
     return pd.read_csv(db_file)
 
-def calculate_directories(basepath):
+def calculate_directories(basepath, base_dir_name):
     '''
     Calculate the directory structure we want to build for running
     our files.
-    :param basepath: base directory for doing work & moving inputs
+    :param basepath: directory where working dir will be created
+    :param base_dir_name: name of working dir (from your spec)
     :return: dict with path structure
     '''
-    base = basepath
+    base = os.path.join(basepath, base_dir_name)
     return {
         'base' : base,
         'checks' : os.path.join(base, 'checks'),
@@ -40,15 +41,16 @@ def calculate_directories(basepath):
         'job_work' : os.path.join(base,'work')
     }
 
-def calculate_directories_midwayscratch(cnet):
+def calculate_directories_midwayscratch(cnet, base_dir_name):
     '''
     Wrapper for calculate directories function; points to user scratch
     partition in the UChicago Midway2 cluster.
     :param cnet: CNetID of user
+    :param base_dir_name: name of working directory to be created
     :return: dict with path structure
     '''
-    basepath = os.path.join('/', 'home', cnet, 'scratch-midway2', 'running')
-    return calculate_directories(basepath)
+    basepath = os.path.join('/', 'home', cnet, 'scratch-midway2')
+    return calculate_directories(basepath, base_dir_name)
 
 def initialize_directories(dirs):
     '''
