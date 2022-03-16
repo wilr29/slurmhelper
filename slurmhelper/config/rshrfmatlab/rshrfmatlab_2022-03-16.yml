@@ -199,9 +199,5 @@ max_job_time: {
 
 compute_function: >
     def compute_custom_vars(job_dict, dirs):
-        print("HOWDY")
-
         job_dict['run_id'] = '{run:02d}'.format(run = int(job_dict['run']))
-            
-        # If you do not have anything to add, just return job_dict.
         return job_dict
