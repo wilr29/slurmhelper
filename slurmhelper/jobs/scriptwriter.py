@@ -95,7 +95,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
 
         # If a custom var computation function is provided in the YAML file, run it
         if 'compute_function' in config.keys():
-            jd = compute_custom_vars(jd,dirs)
+            jd = compute_custom_vars(jd, dirs)
 
         # Append to our list
         jobs_gc.append(jd)
