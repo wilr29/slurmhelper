@@ -176,7 +176,7 @@ output_path_subject: ['sub-{subject}', 'ses-{session}', 'func']
 # Subject-specific file glob (e.g., for checking outputs)
 output_path_subject_expr: 'sub-{subject}_ses-{session}_task-{task}_run-{run:d}_*'
 
-base_directory_name: 'running'
+base_directory_name: 'rshrf2022'
 
 # -------------------------------------------------
 # - Job specification                             -
