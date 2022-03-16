@@ -83,6 +83,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     # enhance each job's dict with global parameters
     jobs_g = [{**row, **config['script_global_settings']} for row in jobs]
 
+    print("Testing")
     # If a custom vars function is provided in the YAML file, load it
     if 'compute_function' in config.keys():
         print("HOWDYHO")
