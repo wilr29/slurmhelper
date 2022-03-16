@@ -84,8 +84,8 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     jobs_g = [{**row, **config['script_global_settings']} for row in jobs]
 
     # If a custom vars function is provided in the YAML file, load it
-    if 'custom_vars_function' in config.keys():
-        exec(config['custom_vars_function']) # overwrites the template function obj (?)
+    if 'compute_function' in config.keys():
+        exec(config['compute_function']) # overwrites the template function obj (?)
 
     # Enhance even more, with computed variables...
     jobs_gc = []
