@@ -197,7 +197,7 @@ max_job_time: {
 # - Custom computation of script parameters       -
 # -------------------------------------------------
 
-compute_function: |
+compute_function: >
     def compute_custom_vars(job_dict, dirs):
         print("HOWDY")
 
