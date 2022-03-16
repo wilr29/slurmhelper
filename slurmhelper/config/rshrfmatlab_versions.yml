@@ -3,5 +3,5 @@ spec_name: 'rshrfmatlab'
 versions:
   {
       '2021-06-01' : 'rshrfmatlab/rshrfmatlab_2021-06-01.yml',
-      '2022-03-16' : 'rshrfmatlab/rshrfmatlab_2021-03-16.yml'
+      '2022-03-16' : 'rshrfmatlab/rshrfmatlab_2022-03-16.yml'
   }
