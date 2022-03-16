@@ -3,11 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to slurmhelper's documentation!
-=======================================
+.. include:: ../README.rst
 
-.. automodule:: slurmhelper
-   :members:
+.. toctree::
+   :maxdepth: 2
+
+   source/slurmhelper
+   spec_guidelines
+
 
 Usage
 -----
@@ -18,6 +21,5 @@ Usage
 
 Navigation
 ==========
-
 * :ref:`genindex`
 * :ref:`search`
