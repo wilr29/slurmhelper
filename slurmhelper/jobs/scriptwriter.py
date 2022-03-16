@@ -3,7 +3,7 @@ Functions leveraged to help create job objects from a given database, and levera
 objects' methods to write template scripts for IO or sbatch submission.
 '''
 
-from ..templates import compute_custom_vars
+# from ..templates import compute_custom_vars
 from pathlib import Path
 from string import Formatter
 import pandas as pd
@@ -84,8 +84,8 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     jobs_g = [{**row, **config['script_global_settings']} for row in jobs]
 
     # If a custom vars function is provided in the YAML file, load it
-    if 'compute_function' in config.keys():
-        exec(config['compute_function']) # overwrites the template function obj (?)
+    if 'compute_custom_vars' in config.keys():
+        exec(config['compute_custom_vars']) # overwrites the template function obj (?)
 
     # Enhance even more, with computed variables...
     jobs_gc = []
@@ -94,8 +94,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
         jd = compute_helpful_vars(job,dirs)
 
         # If a custom var computation function is provided in the YAML file, run it
-        if 'compute_function' in config.keys():
-            print("HALLO")
+        if 'compute_custom_vars' in config.keys():
             jd = compute_custom_vars(jd, dirs)
 
         # Append to our list
