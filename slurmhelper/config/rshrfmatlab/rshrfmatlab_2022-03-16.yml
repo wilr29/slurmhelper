@@ -245,8 +245,7 @@ compute_function: |
         
         from pathlib import Path
 
-        job_dict['run_inputs'] = str(Path(dirs['job_work']).joinpath(
-            '%05d' % job_dict['order_id']).joinpath('derivatives'))
+        job_dict['run_id'] = '{run:02d}'.format(run = int(job_dict['run']))
             
         # If you do not have anything to add, just return job_dict.
         return job_dict
