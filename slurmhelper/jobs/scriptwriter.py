@@ -3,7 +3,7 @@ Functions leveraged to help create job objects from a given database, and levera
 objects' methods to write template scripts for IO or sbatch submission.
 '''
 
-# from ..templates import compute_custom_vars
+from ..templates import compute_custom_vars
 from pathlib import Path
 from string import Formatter
 import pandas as pd
@@ -26,6 +26,10 @@ def compute_helpful_vars(job_dict, dirs):
     from pathlib import Path
 
     job_dict['job_id'] = '%05d' % job_dict['order_id']
+
+    # for bids
+    if 'run' in job_dict.keys():
+        job_dict['run_id'] = '%02d' % job_dict['run']
 
     return job_dict
 
