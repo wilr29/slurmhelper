@@ -85,6 +85,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
 
     # If a custom vars function is provided in the YAML file, load it
     if 'compute_function' in config.keys():
+        print("HOWDYHO")
         exec(config['compute_function']) # overwrites the template function obj (?)
 
     # Enhance even more, with computed variables...
@@ -95,6 +96,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
 
         # If a custom var computation function is provided in the YAML file, run it
         if 'compute_function' in config.keys():
+            print("HALLO")
             jd = compute_custom_vars(jd, dirs)
 
         # Append to our list
