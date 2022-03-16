@@ -116,9 +116,9 @@ clean_script: |
         echo "No working directory detected for job ${job_id}. Skipping..."
     fi
     
-    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run}*" > /dev/null; then
+    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*" > /dev/null; then
         echo "Deleting partial outputs for job ${job_id}..."
-        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run}*
+        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*
     else
         echo "No partial outputs detected for job ${job_id}. Skipping..."
     fi
@@ -152,10 +152,10 @@ copy_script: |
     fi
     
     echo "Copying fmriprep inputs..."
-    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}_desc-confounds*" --include="*task-${task}_run-${run:02d}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run_id}_desc-confounds*" --include="*task-${task}_run-${run_id}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
     
     echo "Copying uchicagoABCDProcessing inputs..."
-    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run_id}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
     
     echo "Done"
     echo "-----------------------------"
