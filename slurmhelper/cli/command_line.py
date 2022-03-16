@@ -1,7 +1,7 @@
 import numpy as np
 from .parser import build_parser
 from ..utils.io import calculate_directories, calculate_directories_midwayscratch, \
-    copy_or_clear, initialize_directories
+    copy_or_clean, initialize_directories
 from ..utils.reporting import list_slurm, check_runs
 from ..jobs import prep_job, prep_job_array, generate_run_scripts
 from ..config import load_rshrfmatlab_spec
@@ -73,12 +73,12 @@ def main():
         else:
             generate_run_scripts(paths, config, args, job_list)
     elif args.operation == 'copy' or args.operation == 'clear':
-        copy_or_clear(job_list, args.operation, paths['job_scripts'])
+        copy_or_clean(job_list, args.operation, paths['job_scripts'])
     elif args.operation == 'reset':
         print("Will clear first, copy next!")
         try:
-            copy_or_clear(job_list, 'clear', paths['job_scripts'])
-            copy_or_clear(job_list, 'copy', paths['job_scripts'])
+            copy_or_clean(job_list, 'clean', paths['job_scripts'])
+            copy_or_clean(job_list, 'copy', paths['job_scripts'])
         except Exception as e:
             raise e
     elif args.operation == 'prep':

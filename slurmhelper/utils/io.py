@@ -94,14 +94,14 @@ def write_job_script(job_id, sbatch_id, dirs, script):
 
     return
 
-def copy_or_clear(job_list,operation,path_scripts):
+def copy_or_clean(job_list,operation,path_scripts):
     '''
     Helper function designed to facilitate:
 
     a) copying inputs from cold storage to the "hot" partition for computation (rationale: UChicago
        HPC does not allow jobs to directly access cold storage, so this must be done pre-submission).
 
-    b) clearing files related to a job from the working directory
+    b) cleaning files related to a job from the working directory
 
     This is completed by leveraging bash scripts created for a given job (jobid_<clean/copy>.sh).
 
@@ -110,7 +110,7 @@ def copy_or_clear(job_list,operation,path_scripts):
     :param path_scripts: where do we expect to find the scripts generated from R (abs path)
     :return: nothin', just some good ol' stuff done via bash
     '''
-    assert(operation == 'copy' or operation == 'clear')
+    assert(operation == 'copy' or operation == 'clean'), "invalid operation specified: %s" % (operation)
     print("========== BEGIN DOING STUFF ==========")
     for job_id in job_list:
         print("----------- BEGIN DOING STUFF FOR JOB {job_id:05d} -----------".format(job_id=job_id))

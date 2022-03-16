@@ -12,6 +12,7 @@ from ..utils.io import write_job_script
 from ..utils.misc import split_list
 from ..utils.time import calculate_wall_time, calculate_min_number_of_parcels
 import os
+from string import Template
 
 # Implementation of the prep portion of the script...
 def prep_job(config, job_list, paths, args, array_job_index=None):
@@ -26,7 +27,13 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
     :param paths: dict output of calculate_directories()
     :param args: parsed ArgParse object
     :param array_job_index: None if this is not to be run as array;
-                            integer if part of array.
+                            integer if part of array.jobs
+❯ ls
+00001_clean.sh 00001_run.sh   00002_copy.sh  00003_clean.sh 00003_run.sh
+00001_copy.sh  00002_clean.sh 00002_run.sh   00003_copy.sh
+(base)
+slurmhelper_testing/scripts/jobs
+❯ cat
     :return: job_name: name of script to run job
     '''
 
@@ -36,7 +43,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
         time = "{hours:02d}:{minutes:02d}:{seconds:02d)".format(hours=args.time[ 0 ], minutes=args.time[ 1 ],
                                                                 seconds=args.time[ 2 ])
     else:  # calculate wall time using our current assumptions
-        time = calculate_wall_time(len(job_list))
+        time = calculate_wall_time(len(job_list),config)
 
     # Give me a good job name
     if args.operation == 'prep-array' and array_job_index is not None:
@@ -51,7 +58,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
     else:
         # Figure out the log path
         log_out = os.path.join(paths['slurm_logs'], '{job_name}.txt'.format(job_name=job_name))
-        header_f = '\n'.join([ config['header'].format(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
+        header_f = '\n'.join([ Template(config['header']).safe_substitute(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
                                              mem=args.memory[ 0 ], time=time, job_array=''), config['preamble'] ])
 
     # Ok, let's create the section where we call each job script.
@@ -68,7 +75,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
     script = '\n\n'.join([ header_f, job_calls_str, '''echo "~~~~~~~~~~~~~ END SLURM JOB ~~~~~~~~~~~~~~"''', 'exit' ])
 
     if not args.dry:
-        write_job_script(job_name, args.cnet[0], args.sbatch_id[0], script)
+        write_job_script(job_name, args.sbatch_id[0], paths, script)
 
     if args.verbose or args.dry:
         print("script will be written to: {path}".format(
@@ -113,7 +120,7 @@ def prep_job_array(config, job_list, paths, args):
         arr_j_i = i + 100
         # make as many jobs as we want, each job is a buddy :)
         # this will write out the sub_job scripts too
-        prep_job(parcel, paths, args, array_job_index=arr_j_i)
+        prep_job(config, parcel, paths, args, array_job_index=arr_j_i)
 
     # ok, here's the array script...
     job_name = 'sb-{sbatch_id:04d}'.format(sbatch_id=args.sbatch_id[ 0 ])  # notice, we still have an sb- name, this is
@@ -125,7 +132,7 @@ def prep_job_array(config, job_list, paths, args):
                                                                 seconds=args.time[ 2 ])
     else:  # calculate wall time using our current assumptions
         parcel_lengths = [ len(p) for p in job_array ]
-        time = calculate_wall_time(max(parcel_lengths))  # we should use the maximum wall time for parcels
+        time = calculate_wall_time(max(parcel_lengths), config)  # we should use the maximum wall time for parcels
 
     # Figure out the log path
     log_out = os.path.join(paths['slurm_logs'],'{job_name}-%a.txt'.format(job_name=job_name))
@@ -141,10 +148,10 @@ def prep_job_array(config, job_list, paths, args):
 
     array_script = '\n'.join([ config['header'].format(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
                                              mem=args.memory[ 0 ], time=time, job_array=arr),
-                               config['array_footer'].format(path_to_array=path_to_array) ])
+                               Template(config['array_footer']).safe_substitute(path_to_array=path_to_array) ])
     if not args.dry:
         # finally, write out the array script
-        write_job_script(job_name, args.cnet[ 0 ], args.sbatch_id[ 0 ], array_script)
+        write_job_script(job_name, args.sbatch_id[0], paths, array_script)
 
     if args.verbose or args.dry:
         print("script will be written to: {path}".format(path=os.path.join(paths['slurm_scripts']
