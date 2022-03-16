@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# pycharm crap
+.idea/
+
+# sample data
+slurmhelper/data

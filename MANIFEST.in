@@ -1,0 +1,2 @@
+include versioneer.py
+include slurmhelper/src/_version.py
