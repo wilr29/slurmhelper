@@ -3,6 +3,19 @@ Various functions to optimize sbatch arrays given time constraints & prior knowl
 '''
 
 import math
+from datetime import date
+
+def get_latest_date(list_iso_dates):
+    '''
+    helpful in identifying latest verison
+    :param list_iso_dates: list of iso-formatted dates, yyyy-mm-dd
+    :return: highest date
+    '''
+    return max([parse_iso_date(d) for d in list_iso_dates]).isoformat()
+
+
+def parse_iso_date(date_string):
+    return date.fromisoformat(date_string)
 
 def delta_to_slurm_time(tdelta):
     '''

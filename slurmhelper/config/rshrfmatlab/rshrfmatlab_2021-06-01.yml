@@ -1,0 +1,252 @@
+---
+spec_name: 'rshrfmatlab'
+spec_version: '2021-06-01'
+
+# -------------------------------------------------
+# - Submission scripts                            -
+# -------------------------------------------------
+
+# All run script templates will be pre-formatted with these parameters.
+script_global_settings: {
+                          n_thr: 8,
+                          mem_mb: 15000,
+                          fd_thr: 0.3,
+                          path_matlab: '/software/matlab-2020b-el7-x86_64/bin/matlab',
+                          path_spm: '/home/fcmeyer/scratch-midway2/spm12',
+                          path_outputs: '/project2/abcd/derivatives'
+}
+
+# Header of script to be submitted to sbatch
+# Very important! this is actually substiting based on what you gave us in the inputs...
+# because sometimes you need to have memory on sbatch be higher than on your job!
+header: |
+    #!/bin/bash -e
+
+    #SBATCH --job-name=${job_name}
+    #SBATCH --output=${log_path}
+    #SBATCH --partition=broadwl
+    #SBATCH --nodes=1
+    #SBATCH --ntasks-per-node=${n_tasks}
+    #SBATCH --mem=${mem}
+    #SBATCH --time=${time}
+    ${job_array}
+
+# Preamble, might include necessary modules to be loaded
+preamble: |
+    
+    # load necessary modules
+    module load python
+    module load matlab/2020b
+    module load fsl/6.0.4
+    module load afni/21.0
+
+    source activate /home/fcmeyer/scratch-midway2/rshrfmatlab
+
+    echo "~~~~~~~~~~~~~ BEGIN SLURM JOB ~~~~~~~~~~~~~~"
+
+# Additional stuff to add to the end of an array
+array_footer: |
+    # sanity checks
+    echo "SLURM_JOBID: " $SLURM_JOBID
+    echo "SLURM_ARRAY_TASK_ID: " $SLURM_ARRAY_TASK_ID
+    echo "SLURM_ARRAY_JOB_ID: " $SLURM_ARRAY_JOB_ID
+
+    bash ${path_to_array}
+
+    exit
+
+run_script: |
+    #!/bin/bash -e
+
+    echo "Begin running job ${job_id}, corresponding to:"
+    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "-----------------------------"
+
+    rshrfmatlab --nthreads ${n_thr} --mem_mb ${mem_mb} --trim_amt ${trim_amt} --trim_tgt ${trim_tgt} \
+        --participant_label ${subject} --session_label ${session} \
+        --task-id ${task} --run-id ${run} --fd_thr ${fd_thr} --tr ${tr} --serial-corr "AR(1)" \
+        --basis_functions sfir canontdd \
+        --keep_deconv roi \
+        --atlas-parametermaps craddock400 shen268 \
+        --atlas-deconv craddock400 shen268 \
+        --keep_non_olrm \
+        ${path_matlab} \
+        ${path_spm} \
+        ${this_job_inputs_dir}/derivatives \
+        ${output_base_dir}/restingstatehrf \
+        ${this_job_work_dir}
+
+    exit_status=$?
+
+    echo "exit status: $exit_status"
+
+    if [ $exit_status -eq 0 ]
+    then
+        echo "it appears things went well, go ahead and rm work and input dirs from scratch"
+        rm -rf ${this_job_work_dir}
+        rm -rf ${this_job_inputs_dir}/derivatives
+        echo "SUCCESS"
+        echo $exit_status
+        exit 0
+    else
+        echo "it appears things did not go well. we wont touch nothing"
+        echo "FAILURE"
+        echo $exit_status
+        exit 1
+    fi
+
+clean_script: |
+    #!/bin/bash -e
+    
+    echo "Cleaning up for job ${job_id}, corresponding to:"
+    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "-----------------------------"
+    
+    if [ -d ${this_job_inputs_dir} ]; then
+        echo "Deleting derivatives inputs for job ${job_id}..."
+        rm -rf ${this_job_inputs_dir}
+    else
+        echo "No derivatives inputs detected for job ${job_id}. Skipping..."
+    fi
+    
+    if [ -d ${this_job_work_dir} ]; then
+        echo "Deleting working directory for job ${job_id}..."
+        rm -rf ${this_job_work_dir}
+    else
+        echo "No working directory detected for job ${job_id}. Skipping..."
+    fi
+    
+    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run}*" > /dev/null; then
+        echo "Deleting partial outputs for job ${job_id}..."
+        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run}*
+    else
+        echo "No partial outputs detected for job ${job_id}. Skipping..."
+    fi
+    
+    if [ -f ${this_job_log_file} ]; then
+        echo "Deleting log file for job ${job_id}..."
+        rm ${this_job_log_file}
+    else
+        echo "No log file detected for job ${job_id}. Skipping..."
+    fi
+    
+    echo "Done."
+    
+    exit
+
+copy_script: |
+    #!/bin/bash -e
+    
+    echo "Copying inputs for job ${job_id}, corresponding to:"
+    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "-----------------------------"
+    
+    echo "Creating directory structure"
+    
+    if [ ! -d ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}/ses-${session} ]; then
+        mkdir -p ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
+    fi
+    
+    if [ ! -d ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ]; then
+        mkdir -p ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
+    fi
+    
+    echo "Copying fmriprep inputs..."
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}_desc-confounds*" --include="*task-${task}_run-${run:02d}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
+    
+    echo "Copying uchicagoABCDProcessing inputs..."
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
+    
+    echo "Done"
+    echo "-----------------------------"
+    exit
+
+# -------------------------------------------------
+# - Inputs and outputs                            -
+# -------------------------------------------------
+
+# This contains information about the jobs to be run.
+# See example for details.
+database: '~/rshrf_db.csv'
+
+# Base directory where outputs are stored
+output_path: "/project2/abcd/derivatives/restingstatehrf"
+# Subject-specific sub-directory (e.g., for BIDS)
+output_path_subject: ['sub-{subject}', 'ses-{session}', 'func']
+# Subject-specific file glob (e.g., for checking outputs)
+output_path_subject_expr: 'sub-{subject}_ses-{session}_task-{task}_run-{run:d}_*'
+
+base_directory_name: 'running'
+
+# -------------------------------------------------
+# - Job specification                             -
+# -------------------------------------------------
+expected_n_files: 150 # for a given run
+job_ramp_up_time: {
+                    minutes: 4
+}
+job_time: {
+            minutes: 27
+}
+max_job_time: {
+                hours: 22,
+                minutes: 56
+}
+
+# -------------------------------------------------
+# - Custom computation of script parameters       -
+# -------------------------------------------------
+
+compute_function: |
+    def compute_custom_vars(job_dict, dirs):
+        '''
+        DO NOT CHANGE THE NAME OR ARGS OF THIS FUNCTION!!!!!!
+        
+        This function will receive as input a dictionary representing all
+        the run parameters for a given job, enhanced with all the keys
+        provided as global run parameters in your specification YAML file.
+
+        It will also receive as input a dictionary referencing various
+        helpful paths in your structure, for example:
+
+        {'base': '/home/fcmeyer/scratch-midway2/running',
+        'checks': '/home/fcmeyer/scratch-midway2/running/checks',
+        'slurm_scripts': '/home/fcmeyer/scratch-midway2/running/scripts/slurm',
+        'slurm_logs': '/home/fcmeyer/scratch-midway2/running/logs/slurm',
+        'job_scripts': '/home/fcmeyer/scratch-midway2/running/scripts/jobs',
+        'job_logs': '/home/fcmeyer/scratch-midway2/running/logs/jobs',
+        'job_inputs': '/home/fcmeyer/scratch-midway2/running/inputs',
+        'job_work': '/home/fcmeyer/scratch-midway2/running/work'}
+
+        If you are planning to have some job-specific stuff be computed,
+        then please ensure that the return of this function is a dict
+        including all the key:items in job_dict, plus the key:item pairs
+        you would like to estimate for a job.
+
+        NOTE: the parameters 'job_id', 'path_work' and 'path_inputs'
+            were already automatically calculated for you and added
+            to the dict you are getting. Please do NOT estimate them here!
+            If they are not needed for your spec, they will be cleared out
+
+        TIP: please include any non-base python imports within the scope of this
+            function (under the def: statement) since they might not be loaded in my
+            og code. Also, make sure you install them to your env!
+
+        :param job_dict: a dictionary representing a row. for example, if
+        you had a csv file with rows [sub,ses,task,run,order_id], and also
+        defined globals [conda_env_path, matlab_path], you would get a dict
+        {
+            sub: NIDA2322 ses: 1, task: 'rest', run: 2, order_id:5,
+            conda_env_path:'/project2/conda/myenv', matlab_path:'/usr/bin/matlab'
+        }
+        :param dirs: output of ..utils.io:calculate_directories()
+        :return: job_dict, plus keys you add!
+        '''
+        
+        from pathlib import Path
+
+        job_dict['run_inputs'] = str(Path(dirs['job_work']).joinpath(
+            '%05d' % job_dict['order_id']).joinpath('derivatives'))
+            
+        # If you do not have anything to add, just return job_dict.
+        return job_dict

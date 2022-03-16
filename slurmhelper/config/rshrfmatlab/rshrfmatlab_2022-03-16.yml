@@ -1,6 +1,6 @@
 ---
 spec_name: 'rshrfmatlab'
-spec_version: '2021.06'
+spec_version: '2022-03-16'
 
 # -------------------------------------------------
 # - Submission scripts                            -
@@ -65,10 +65,10 @@ run_script: |
     rshrfmatlab --nthreads ${n_thr} --mem_mb ${mem_mb} --trim_amt ${trim_amt} --trim_tgt ${trim_tgt} \
         --participant_label ${subject} --session_label ${session} \
         --task-id ${task} --run-id ${run} --fd_thr ${fd_thr} --tr ${tr} --serial-corr "AR(1)" \
-        --basis_functions sfir canontdd \
+        --basis_functions sfir gamma2 gamma3 \
         --keep_deconv roi \
-        --atlas-parametermaps craddock400 shen268 \
-        --atlas-deconv craddock400 shen268 \
+        --atlas-parametermaps aal3v1 craddock400 shen268 \
+        --atlas-deconv aal3v1 craddock400 shen268 \
         --keep_non_olrm \
         ${path_matlab} \
         ${path_spm} \

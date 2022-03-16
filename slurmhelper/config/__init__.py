@@ -2,16 +2,23 @@
 Routines for parsing and loading job specification files.
 '''
 import os.path
+from datetime import timedelta
 import yaml
 from ..utils.io import pkg_config_dir
-from datetime import timedelta
+from ..utils.time import get_latest_date
 
-def load_rshrfmatlab_spec():
+def load_rshrfmatlab_spec(version='latest'):
     '''
     Leverages built in configuration from yaml file
     :return: dictionary with run parameters
     '''
-    return load_job_spec(os.path.join(pkg_config_dir(), 'rshrfmatlab.yml'))
+    with open(os.path.join(pkg_config_dir(), 'rshrfmatlab_versions.yml'),'r') as file:
+        spec_versions = yaml.load(file, Loader=yaml.FullLoader)
+
+    if version == 'latest':
+        version = get_latest_date(spec_versions['versions'].keys())
+
+    return load_job_spec(os.path.join(pkg_config_dir(), spec_versions['versions'][version]))
 
 def load_job_spec(spec_file):
     '''

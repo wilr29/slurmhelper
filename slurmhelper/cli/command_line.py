@@ -54,7 +54,10 @@ def main():
     # load config
     if args.spec is not None:
         if args.spec[0] == 'rshrfmatlab':
-            config = load_rshrfmatlab_spec()
+            version='latest'
+            if args.spec_version is not None:
+                version=args.spec_version[0]
+            config = load_rshrfmatlab_spec(version)
         else:
             raise ValueError("Invalid spec provided?")
     elif args.spec_file is not None:
