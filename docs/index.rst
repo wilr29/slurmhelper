@@ -10,6 +10,7 @@
 
    source/slurmhelper
    spec_guidelines
+   guide
 
 
 Usage
