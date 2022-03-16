@@ -137,40 +137,28 @@ clean_script: |
 copy_script: |
     #!/bin/bash -e
     
-    echo "Cleaning up for job ${job_id}, corresponding to:"
+    echo "Copying inputs for job ${job_id}, corresponding to:"
     echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
     echo "-----------------------------"
     
-    if [ -d ${this_job_inputs_dir} ]; then
-        echo "Deleting derivatives inputs for job ${job_id}..."
-        rm -rf ${this_job_inputs_dir}
-    else
-        echo "No derivatives inputs detected for job ${job_id}. Skipping..."
+    echo "Creating directory structure"
+    
+    if [ ! -d ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}/ses-${session} ]; then
+        mkdir -p ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
     fi
     
-    if [ -d ${this_job_work_dir} ]; then
-        echo "Deleting working directory for job ${job_id}..."
-        rm -rf ${this_job_work_dir}
-    else
-        echo "No working directory detected for job ${job_id}. Skipping..."
+    if [ ! -d ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ]; then
+        mkdir -p ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
     fi
     
-    if compgen -G "${this_job_output_dir}/*task-${task}_run-${run}*" > /dev/null; then
-        echo "Deleting partial outputs for job ${job_id}..."
-        rm ${this_job_output_dir}/*task-${task}_run-${run}*
-    else
-        echo "No partial outputs detected for job ${job_id}. Skipping..."
-    fi
+    echo "Copying fmriprep inputs..."
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}_desc-confounds*" --include="*task-${task}_run-${run:02d}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
     
-    if [ -f ${this_job_log_file} ]; then
-        echo "Deleting log file for job ${job_id}..."
-        rm ${this_job_log_file}
-    else
-        echo "No log file detected for job ${job_id}. Skipping..."
-    fi
+    echo "Copying uchicagoABCDProcessing inputs..."
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
     
-    echo "Done."
-    
+    echo "Done"
+    echo "-----------------------------"
     exit
 
 # -------------------------------------------------
