@@ -30,7 +30,7 @@ def build_parser():
     parser = argparse.ArgumentParser(prog='runhelper', usage='%(prog)s operation [options]',
                                      description='Help with big slurm submission things')
 
-    parser.add_argument('operation', type=str, choices=[ 'copy', 'clear', 'reset',
+    parser.add_argument('operation', type=str, choices=[ 'copy', 'clean', 'reset',
                                                          'prep', 'prep-array', 'list', 'check','init',
                                                          'genscripts'], action='store')
     spec = parser.add_mutually_exclusive_group()

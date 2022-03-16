@@ -97,7 +97,7 @@ def main():
     elif args.operation == 'copy' or args.operation == 'clean':
         copy_or_clean(job_list, args.operation, paths['job_scripts'])
     elif args.operation == 'reset':
-        print("Will clear first, copy next!")
+        print("Will clean first, copy next!")
         try:
             copy_or_clean(job_list, 'clean', paths['job_scripts'])
             copy_or_clean(job_list, 'copy', paths['job_scripts'])
