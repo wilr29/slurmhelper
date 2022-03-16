@@ -40,7 +40,7 @@ preamble: |
     module load fsl/6.0.4
     module load afni/21.0
 
-    source activate /home/fcmeyer/scratch-midway2/rshrfmatlab
+    conda activate /home/fcmeyer/.conda/envs/rshrfmatlab_2022
 
     echo "~~~~~~~~~~~~~ BEGIN SLURM JOB ~~~~~~~~~~~~~~"
 
