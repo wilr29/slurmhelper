@@ -94,7 +94,7 @@ def main():
             generate_run_scripts(paths, config, args)
         else:
             generate_run_scripts(paths, config, args, job_list)
-    elif args.operation == 'copy' or args.operation == 'clear':
+    elif args.operation == 'copy' or args.operation == 'clean':
         copy_or_clean(job_list, args.operation, paths['job_scripts'])
     elif args.operation == 'reset':
         print("Will clear first, copy next!")
