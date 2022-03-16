@@ -1,3 +1,7 @@
+'''
+Definition of Job object class, associated methods, and TestableJob class extension.
+'''
+
 # This file contains the base job class, which is then augmented for each
 # specific use case with tests, etc.
 import copy
@@ -185,10 +189,7 @@ class Job:
     def compute_scripts(self, config, verbose=False):
         '''
         compute script thingys
-        :param config: config dict returned from yaml file. need keys:
-            - run_script
-            - copy_script
-            - clean_script
+        :param config: config dict returned from yaml file. need keys: (a) run_script; (b) copy_script; (c) clean_script
         :param verbose: whether to print extra output (default=False)
         :return:
         '''

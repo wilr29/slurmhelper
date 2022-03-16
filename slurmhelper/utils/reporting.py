@@ -1,3 +1,7 @@
+'''
+Functions used to aid in reporting information to the user about runs, jobs, etc.
+'''
+
 import os
 import glob
 import re

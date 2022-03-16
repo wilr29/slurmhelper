@@ -1,3 +1,8 @@
+'''
+Functions leveraged to help create job objects from a given database, and leverage these
+objects' methods to write template scripts for IO or sbatch submission.
+'''
+
 from ..templates import compute_custom_vars
 from pathlib import Path
 from string import Formatter
@@ -32,18 +37,18 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     to generate scripts
     :param dirs: output of ..utils.io:calculate_directories()
     :param config: dict generated from reading the .yml spec
-    :return: ordered list, with format:
-    [
-        {'id': 1,
-         'run_script': 'a long str...',
-         'params': {
-                'order_id' : 1,
-                'your_csv_var_here' : 1.234,
-                'your_global_param_here' : 'potato'
-            }
-         }
-         ...
-    ]
+    :return: ordered list, with format::
+        [
+            {'id': 1,
+             'run_script': 'a long str...',
+             'params': {
+                    'order_id' : 1,
+                    'your_csv_var_here' : 1.234,
+                    'your_global_param_here' : 'potato'
+                }
+             }
+             ...
+        ]
     '''
 
     # Read database file

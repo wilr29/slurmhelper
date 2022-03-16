@@ -1,5 +1,5 @@
 '''
-Miscellaneous helper functions
+Miscellaneous helper functions.
 '''
 
 # Lil' helper function from stackoverflow

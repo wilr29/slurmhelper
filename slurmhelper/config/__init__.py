@@ -1,5 +1,7 @@
+'''
+Routines for parsing and loading job specification files.
+'''
 import os.path
-
 import yaml
 from ..utils.io import pkg_config_dir
 from datetime import timedelta

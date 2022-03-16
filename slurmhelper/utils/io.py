@@ -1,5 +1,5 @@
 '''
-Utility functions leveraged for I/O filesystem operations
+Utility functions leveraged for I/O filesystem operations.
 '''
 
 import os

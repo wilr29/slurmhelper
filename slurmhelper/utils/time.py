@@ -1,6 +1,5 @@
 '''
-Various functions to optimize sbatch arrays given time constraints & prior
-knowledge of what to expect
+Various functions to optimize sbatch arrays given time constraints & prior knowledge of what to expect.
 '''
 
 import math
