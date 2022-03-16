@@ -8,15 +8,17 @@ spec_version: '2021.06'
 
 # All run script templates will be pre-formatted with these parameters.
 script_global_settings: {
-                          n_thr: 1,
-                          mem_mb: 1,
+                          n_thr: 8,
+                          mem_mb: 15000,
                           fd_thr: 0.3,
-                          path_matlab: '/matlab',
-                          path_spm: '/spm',
-                          path_outputs: '/outputs'
+                          path_matlab: '/software/matlab-2020b-el7-x86_64/bin/matlab',
+                          path_spm: '/home/fcmeyer/scratch-midway2/spm12',
+                          path_outputs: '/project2/abcd/derivatives'
 }
 
 # Header of script to be submitted to sbatch
+# Very important! this is actually substiting based on what you gave us in the inputs...
+# because sometimes you need to have memory on sbatch be higher than on your job!
 header: |
     #!/bin/bash -e
 
@@ -31,6 +33,7 @@ header: |
 
 # Preamble, might include necessary modules to be loaded
 preamble: |
+    
     # load necessary modules
     module load python
     module load matlab/2020b

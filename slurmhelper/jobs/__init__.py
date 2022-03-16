@@ -58,8 +58,9 @@ slurmhelper_testing/scripts/jobs
     else:
         # Figure out the log path
         log_out = os.path.join(paths['slurm_logs'], '{job_name}.txt'.format(job_name=job_name))
-        header_f = '\n'.join([ Template(config['header']).safe_substitute(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
-                                             mem=args.memory[ 0 ], time=time, job_array=''), config['preamble'] ])
+        hdr = Template(config['header']).safe_substitute(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[0],
+                                                         mem=args.memory[0], time=time, job_array='')
+        header_f = '\n'.join([ hdr, config['preamble'] ])
 
     # Ok, let's create the section where we call each job script.
     script_call = 'bash {target_path} 2>&1 | tee {job_log_path}'
@@ -146,8 +147,9 @@ def prep_job_array(config, job_list, paths, args):
     path_to_array = os.path.join(paths['slurm_scripts'],
                                  'sb-{sbatch_id:04d}-$SLURM_ARRAY_TASK_ID.sh'.format(sbatch_id=args.sbatch_id[ 0 ]))
 
-    array_script = '\n'.join([ config['header'].format(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
-                                             mem=args.memory[ 0 ], time=time, job_array=arr),
+    hdr = Template(config['header']).safe_substitute(job_name=job_name, log_path=log_out, n_tasks=args.n_tasks[ 0 ],
+                                                     mem=args.memory[ 0 ], time=time, job_array=arr)
+    array_script = '\n'.join([ hdr,
                                Template(config['array_footer']).safe_substitute(path_to_array=path_to_array) ])
     if not args.dry:
         # finally, write out the array script
