@@ -14,6 +14,7 @@
    .. autosummary::
    
       split_list
+      unique
    
    
 

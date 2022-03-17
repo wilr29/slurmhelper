@@ -3,8 +3,7 @@ Various functions to optimize sbatch arrays given time constraints & prior knowl
 '''
 
 import math
-from datetime import date
-from argparse import ArgumentTypeError
+from datetime import date, datetime
 
 def get_latest_date(list_iso_dates):
     '''
@@ -17,6 +16,19 @@ def get_latest_date(list_iso_dates):
 
 def parse_iso_date(date_string):
     return date.fromisoformat(date_string)
+
+def datetime_valid(dt_str):
+    '''
+    Validate if a string can be parsed to datetime. Code sourced from:
+    https://stackoverflow.com/a/61569783
+    :param dt_str: datetime string to parse
+    :return: true if valid iso, false otherwise
+    '''
+    try:
+        datetime.fromisoformat(dt_str)
+    except:
+        return False
+    return True
 
 def delta_to_slurm_time(tdelta):
     '''
@@ -55,23 +67,3 @@ def calculate_min_number_of_parcels(n_jobs, config):
     max_job_time_secs = config['max_job_time'].total_seconds()
     total_time = n_jobs * config['job_time'].total_seconds()
     return math.ceil(total_time / max_job_time_secs)
-
-def wall_time_type(x):
-    '''
-    Definition of a wall time type for validating in argparse.
-    :param x: list assumed to be of length 3 in order hours, minutes, seconds.
-    :return: x (following validation)
-    '''
-    # Assertions
-    assert (isinstance(x, list))
-    assert (len(x) == 3)
-    # Validation
-    hours = x[ 0 ]
-    minutes = x[ 1 ]
-    seconds = x[ 2 ]
-    if seconds > 59 or seconds < 0:
-        raise ArgumentTypeError("Seconds value needs to be 0 <= secs < 60")
-    elif minutes > 59 or minutes < 0:
-        raise ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
-    elif hours > 23 or hours < 0:
-        raise ArgumentTypeError("Hours value needs to be 0 <= hours < 24")

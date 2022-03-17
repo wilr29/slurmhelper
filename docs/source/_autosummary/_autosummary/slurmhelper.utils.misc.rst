@@ -1,4 +1,4 @@
-slurmhelper.utils.misc
+﻿slurmhelper.utils.misc
 ======================
 
 .. automodule:: slurmhelper.utils.misc
@@ -14,6 +14,7 @@ slurmhelper.utils.misc
    .. autosummary::
    
       split_list
+      unique
    
    
 

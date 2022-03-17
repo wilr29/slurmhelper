@@ -1,5 +1,52 @@
 import argparse
-from slurmhelper.utils.time import wall_time_type
+from ..config import get_builtin_specs
+
+valid_specs = get_builtin_specs()
+valid_spec_names = valid_specs.keys()
+
+def wall_time_type(x):
+    '''
+    Definition of a wall time type for validating in argparse.
+    :param x: list assumed to be of length 3 in order hours, minutes, seconds.
+    :return:
+    '''
+    # Assertions
+    assert (isinstance(x, list))
+    assert (len(x) == 3)
+    # Validation
+    hours = x[ 0 ]
+    minutes = x[ 1 ]
+    seconds = x[ 2 ]
+    if seconds > 59 or seconds < 0:
+        raise argparse.ArgumentTypeError("Seconds value needs to be 0 <= secs < 60")
+    elif minutes > 59 or minutes < 0:
+        raise argparse.ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
+    elif hours > 23 or hours < 0:
+        raise argparse.ArgumentTypeError("Hours value needs to be 0 <= hours < 24")
+
+def built_in_spec_type(x:str):
+    '''
+    Definition for valid built-in specs
+    :param x: string
+    :return:
+    '''
+    # Assertions
+    assert (isinstance(x, str)), "a string should be provided..."
+    # Validation
+    l = x.split(':')
+    assert(len(l) == 1 or len(l) == 2), f'Something weird is happening when parsing your built-in spec argument. ' \
+                                        f'Make sure you do not have more than one colon ' \
+                                        f'present. You provided: {x}'
+    spec_name = l[0]
+    if spec_name not in valid_specs.keys():
+        raise argparse.ArgumentTypeError(f"The spec you indicated ({spec_name}) is not implemented. "
+                                         f"Specs currently available are: ({' '.join(valid_specs.keys())})")
+    if len(l) == 2:
+        spec_version = l[1]
+        if spec_version not in valid_specs[spec_name]['versions'] and spec_version != 'latest':
+            raise argparse.ArgumentTypeError(f"The spec {spec_name} is valid, but you indicated a version that is "
+                                             f"not implemented: {spec_version}. Currently available options for this "
+                                             f"spec are: {' '.join(valid_specs[spec_name]['versions'])}")
 
 def add_sbatch_args(parser):
     '''
@@ -38,7 +85,6 @@ def add_ids_args(parser, required=True):
                      action='store')
     return parser
 
-
 def build_parser():
     '''
     Utility function to build a parser object for this script.
@@ -58,35 +104,33 @@ def build_parser():
     parser.add_argument('--dry', '-d', action='store_true',
                         help='Dry run - do not execute any scripts or run commands. '
                              'Useful for debugging.')
-    parser.add_argument('--cluster', type=str, default=['midway2-scratch'],
+    parser.add_argument('--cluster', type=str, nargs=1, default=['midway2-scratch'],
                         choices=[ 'midway2-scratch', 'tmp'], action='store',
                         help='Name of the cluster preset to use. Currently, only '
                              'UChicago Midway2 (run on user scratch) is implemented; '
                              'tmp is offered as an option for debugging this pkg (to /tmp)')
-    parser.add_argument('--cnet', type=str, default=['fcmeyer'], action='store',
-                        help='CNetID of the person using this. Used to calculate the path '
-                             'to scratch where the pre-fabricated bash scripts are being stored. '
-                             'Primarily here b/c UChicago. Ignored otherwise.')
-
+    parser.add_argument('--userid', type=str, nargs=1, action='store',
+                         help='User ID (e.g., CNetID at UChicago) of the person using this. '
+                              'Used for some clusters (e.g., in midway2-scratch, to calculate the path '
+                              'to scratch where the pre-fabricated bash '
+                              'scripts are being stored. Ignored otherwise')
+    # specs
     spec = parser.add_mutually_exclusive_group(required=True)
-    spec.add_argument('--spec-name','--spec_name', type=str, nargs=1,
-                      choices=['rshrfmatlab'], action='store',
-                      help='job specification to load from built-ins.')
     spec.add_argument('--spec-file', '--spec_file', type=str, nargs=1, action='store',
                       help='job specification yml file (if'
                            'not implemented in main pkg)')
+    spec.add_argument('--spec-builtin', '--spec_builtin', type=built_in_spec_type, nargs=1,
+                      action='store', help='job specification to load from built-ins. '
+                                           'you may use <spec>:<version_tag> if you'
+                                           'would like to use a specific version. if '
+                                           '<spec> or <spec>:latest is provided, the latest version'
+                                           'will be used.')
 
-    # TODO: additional validation here.
-    spec.add_argument('--spec-version','--spec_version',type=str, nargs=1,
-                      action='store', help='version of the spec to use. only considered'
-                                           'if spec-name is provided.')
-
-    subparsers = parser.add_subparsers(help='sub-command help')
+    subparsers = parser.add_subparsers(title='commands', dest='operation', required=True)
 
     # create the parser for the "INIT" command
     # -----------------------------------------------------------------------
     init = subparsers.add_parser('init', help='initialize directory structure')
-    init.add_argument('number', type=int, help='number help')
 
     # create the parser for the "LIST" command
     # -----------------------------------------------------------------------

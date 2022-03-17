@@ -5,7 +5,7 @@ from ..utils.io import calculate_directories, calculate_directories_midwayscratc
     copy_or_clean, initialize_directories
 from ..utils.reporting import list_slurm, check_runs
 from ..jobs import prep_job, prep_job_array, generate_run_scripts
-from ..config import load_rshrfmatlab_spec, load_job_spec
+from ..config import load_builtin_spec, load_job_spec
 
 def main():
     '''
@@ -76,7 +76,7 @@ def main():
     # TODO: implement more clusters / ability for user to insert own config here
 
     if args.cluster == 'midway2-scratch':
-        paths = calculate_directories_midwayscratch(args.cnet[0], base_dir_name)
+        paths = calculate_directories_midwayscratch(args.userid, base_dir_name)
     elif args.cluster == 'tmp': # for debugging
         paths = calculate_directories('/tmp/slurmhelper_testing', base_dir_name)
     else:

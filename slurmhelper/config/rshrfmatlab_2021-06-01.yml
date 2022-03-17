@@ -1,6 +1,6 @@
 ---
 spec_name: 'rshrfmatlab'
-spec_version: '2022-03-16'
+spec_version: '2021-06-01'
 
 # -------------------------------------------------
 # - Submission scripts                            -
@@ -12,8 +12,7 @@ script_global_settings: {
                           mem_mb: 15000,
                           fd_thr: 0.3,
                           path_matlab: '/software/matlab-2020b-el7-x86_64/bin/matlab',
-                          path_spm: '/home/fcmeyer/scratch-midway2/spm12',
-                          path_outputs: '/project2/abcd/derivatives'
+                          path_spm: '/home/fcmeyer/scratch-midway2/spm12'
 }
 
 # Header of script to be submitted to sbatch
@@ -40,7 +39,7 @@ preamble: |
     module load fsl/6.0.4
     module load afni/21.0
 
-    conda activate /home/fcmeyer/.conda/envs/rshrfmatlab_2022
+    source activate /home/fcmeyer/scratch-midway2/rshrfmatlab
 
     echo "~~~~~~~~~~~~~ BEGIN SLURM JOB ~~~~~~~~~~~~~~"
 
@@ -65,10 +64,10 @@ run_script: |
     rshrfmatlab --nthreads ${n_thr} --mem_mb ${mem_mb} --trim_amt ${trim_amt} --trim_tgt ${trim_tgt} \
         --participant_label ${subject} --session_label ${session} \
         --task-id ${task} --run-id ${run} --fd_thr ${fd_thr} --tr ${tr} --serial-corr "AR(1)" \
-        --basis_functions sfir gamma2 gamma3 \
+        --basis_functions sfir canontdd \
         --keep_deconv roi \
-        --atlas-parametermaps aal3v1 craddock400 shen268 \
-        --atlas-deconv aal3v1 craddock400 shen268 \
+        --atlas-parametermaps craddock400 shen268 \
+        --atlas-deconv craddock400 shen268 \
         --keep_non_olrm \
         ${path_matlab} \
         ${path_spm} \
@@ -116,9 +115,9 @@ clean_script: |
         echo "No working directory detected for job ${job_id}. Skipping..."
     fi
     
-    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*" > /dev/null; then
+    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run}*" > /dev/null; then
         echo "Deleting partial outputs for job ${job_id}..."
-        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*
+        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run}*
     else
         echo "No partial outputs detected for job ${job_id}. Skipping..."
     fi
@@ -152,10 +151,10 @@ copy_script: |
     fi
     
     echo "Copying fmriprep inputs..."
-    rsync -zarv --include="*/" --include="*task-${task}_run-${run_id}_desc-confounds*" --include="*task-${task}_run-${run_id}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}_desc-confounds*" --include="*task-${task}_run-${run:02d}_space-MNI152NLin6Asym_desc-brain_mask*" --exclude="*" /cds2/abcd/cold/derivatives/fmriprep/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/fmriprep/sub-${subject}
     
     echo "Copying uchicagoABCDProcessing inputs..."
-    rsync -zarv --include="*/" --include="*task-${task}_run-${run_id}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
+    rsync -zarv --include="*/" --include="*task-${task}_run-${run:02d}*" --exclude="*" /cds2/abcd/cold/derivatives/uchicagoABCDProcessing/sub-${subject}/ses-${session} ${this_job_inputs_dir}/derivatives/uchicagoABCDProcessing/sub-${subject}
     
     echo "Done"
     echo "-----------------------------"
@@ -176,7 +175,7 @@ output_path_subject: ['sub-{subject}', 'ses-{session}', 'func']
 # Subject-specific file glob (e.g., for checking outputs)
 output_path_subject_expr: 'sub-{subject}_ses-{session}_task-{task}_run-{run:d}_*'
 
-base_directory_name: 'rshrf2022'
+base_directory_name: 'running'
 
 # -------------------------------------------------
 # - Job specification                             -
@@ -197,8 +196,56 @@ max_job_time: {
 # - Custom computation of script parameters       -
 # -------------------------------------------------
 
-# not yet working... UGHHHH
-compute_custom_vars: >
+compute_function: |
     def compute_custom_vars(job_dict, dirs):
-        # job_dict['run_id'] = '{run:02d}'.format(run = int(job_dict['run']))
+        '''
+        DO NOT CHANGE THE NAME OR ARGS OF THIS FUNCTION!!!!!!
+        
+        This function will receive as input a dictionary representing all
+        the run parameters for a given job, enhanced with all the keys
+        provided as global run parameters in your specification YAML file.
+
+        It will also receive as input a dictionary referencing various
+        helpful paths in your structure, for example:
+
+        {'base': '/home/fcmeyer/scratch-midway2/running',
+        'checks': '/home/fcmeyer/scratch-midway2/running/checks',
+        'slurm_scripts': '/home/fcmeyer/scratch-midway2/running/scripts/slurm',
+        'slurm_logs': '/home/fcmeyer/scratch-midway2/running/logs/slurm',
+        'job_scripts': '/home/fcmeyer/scratch-midway2/running/scripts/jobs',
+        'job_logs': '/home/fcmeyer/scratch-midway2/running/logs/jobs',
+        'job_inputs': '/home/fcmeyer/scratch-midway2/running/inputs',
+        'job_work': '/home/fcmeyer/scratch-midway2/running/work'}
+
+        If you are planning to have some job-specific stuff be computed,
+        then please ensure that the return of this function is a dict
+        including all the key:items in job_dict, plus the key:item pairs
+        you would like to estimate for a job.
+
+        NOTE: the parameters 'job_id', 'path_work' and 'path_inputs'
+            were already automatically calculated for you and added
+            to the dict you are getting. Please do NOT estimate them here!
+            If they are not needed for your spec, they will be cleared out
+
+        TIP: please include any non-base python imports within the scope of this
+            function (under the def: statement) since they might not be loaded in my
+            og code. Also, make sure you install them to your env!
+
+        :param job_dict: a dictionary representing a row. for example, if
+        you had a csv file with rows [sub,ses,task,run,order_id], and also
+        defined globals [conda_env_path, matlab_path], you would get a dict
+        {
+            sub: NIDA2322 ses: 1, task: 'rest', run: 2, order_id:5,
+            conda_env_path:'/project2/conda/myenv', matlab_path:'/usr/bin/matlab'
+        }
+        :param dirs: output of ..utils.io:calculate_directories()
+        :return: job_dict, plus keys you add!
+        '''
+        
+        from pathlib import Path
+
+        job_dict['run_inputs'] = str(Path(dirs['job_work']).joinpath(
+            '%05d' % job_dict['order_id']).joinpath('derivatives'))
+            
+        # If you do not have anything to add, just return job_dict.
         return job_dict
