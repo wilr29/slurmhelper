@@ -18,7 +18,7 @@ class Job:
     # TODO: refactor such that this, Job and TestableJob are all the same base
     #       class.. defined flexibly... And document it better...
 
-    def __init__(self, order_id, dirs, job_dict=None, config=None):
+    def __init__(self, order_id, dirs, job_dict=None, config=None, verbose=False):
         self.id = order_id
         self._basedirs = dirs
         self._jd = job_dict
@@ -34,7 +34,7 @@ class Job:
         }
         # this adds a bunch of job-specific paths to the job param dict that can be used to fill in
         # a template script! :)
-        self.compute_paths(config)
+        self.compute_paths(config, verbose)
 
         self._is_scripted = False
 
@@ -132,11 +132,10 @@ class Job:
         fields_rm = list(set([f for f in self._jd.keys() if f not in fields]))
 
         if verbose:
-            print("From the available %d job parameters, %d will be removed for formatting script." % (len(self._jd.keys()),
-                                                                                                 len(fields_rm)
-                                                                                                 ))
+            print(f"From the available {len(self._jd.keys())} job parameters, "
+                  f"{len(fields_rm)} will be removed for formatting script." )
             if len(fields_rm) > 0:
-                print("These are: %s" % (' '.join(fields_rm)))
+                print("These are: %s" % (' '.join(["'{s}'".format(s=s)for s in fields_rm])))
 
         dd = copy.deepcopy(self._jd)
 
@@ -230,12 +229,14 @@ class Job:
         for op in to_write:
             self._write(op)
 
-    def compute_paths(self, config=None):
+    def compute_paths(self, config=None, verbose=False):
         '''
         Compute various job-related paths. Extends basedirs with job-specific info.
         :return: dict, with paths.
         '''
         bd = self._basedirs
+        print(bd)
+        print(self._jd)
         # add global base dirs to params
         # for base_path in bd.keys():
         #     self._jd['_'.join(['global', base_path])] = bd[base_path]

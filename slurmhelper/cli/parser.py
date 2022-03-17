@@ -1,4 +1,5 @@
 import argparse
+import os
 from ..config import get_builtin_specs
 
 valid_specs = get_builtin_specs()
@@ -23,8 +24,9 @@ def wall_time_type(x):
         raise argparse.ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
     elif hours > 23 or hours < 0:
         raise argparse.ArgumentTypeError("Hours value needs to be 0 <= hours < 24")
+    return x
 
-def built_in_spec_type(x:str):
+def built_in_spec_type(x):
     '''
     Definition for valid built-in specs
     :param x: string
@@ -47,6 +49,19 @@ def built_in_spec_type(x:str):
             raise argparse.ArgumentTypeError(f"The spec {spec_name} is valid, but you indicated a version that is "
                                              f"not implemented: {spec_version}. Currently available options for this "
                                              f"spec are: {' '.join(valid_specs[spec_name]['versions'])}")
+    return x
+
+def valid_file_type(x):
+    if not os.path.isfile(x):
+        raise argparse.ArgumentTypeError(f"The specified spec file path {x} does not lead to a valid / existing file."
+                                         f"Please ensure you have correctly entered this!")
+    return x
+
+def valid_folder_type(x):
+    if not os.path.isdir(x):
+        raise argparse.ArgumentTypeError(f"The specified spec path {x} does not lead to a valid / existing folder."
+                                         f"Please ensure you have correctly entered this!")
+    return x
 
 def add_sbatch_args(parser):
     '''
@@ -64,7 +79,7 @@ def add_sbatch_args(parser):
                         help='Memory (in mb) to request')
     parser.add_argument('--sbatch-id', '--sbatch_id','-s', type=int,
                         nargs=1, help='Specify an sbatch job id, to identify the '
-                                       'submission script to be created.')
+                                       'submission script to be created.', required=True)
     parser.add_argument('--no-header', '--no_header', action='store_true',
                         help='Create sbatch job script, but without the sbatch header. Useful if you are '
                              'creating this script as part of an array, or to run locally.')
@@ -104,19 +119,23 @@ def build_parser():
     parser.add_argument('--dry', '-d', action='store_true',
                         help='Dry run - do not execute any scripts or run commands. '
                              'Useful for debugging.')
-    parser.add_argument('--cluster', type=str, nargs=1, default=['midway2-scratch'],
-                        choices=[ 'midway2-scratch', 'tmp'], action='store',
-                        help='Name of the cluster preset to use. Currently, only '
-                             'UChicago Midway2 (run on user scratch) is implemented; '
-                             'tmp is offered as an option for debugging this pkg (to /tmp)')
+    base_folder = parser.add_mutually_exclusive_group(required=True)
+    base_folder.add_argument('--cluster', type=str, nargs=1,
+                        choices=[ 'midway2-scratch'], action='store',
+                        help='Use defaults for a given HPC cluster to use. Currently, only '
+                             'UChicago Midway2 (run on user scratch) is implemented.')
+    base_folder.add_argument('--wd-path','--wd_path', type=valid_folder_type, nargs=1, action='store',
+                             help='Provide your own path to create a working directory tree. '
+                                  'E.g., if you want this to be someplace like /project2/abcd/mystuff '
+                                  '(less efficient...), or for testing')
     parser.add_argument('--userid', type=str, nargs=1, action='store',
                          help='User ID (e.g., CNetID at UChicago) of the person using this. '
-                              'Used for some clusters (e.g., in midway2-scratch, to calculate the path '
+                              'Required for some clusters (e.g., in midway2-scratch, to calculate the path '
                               'to scratch where the pre-fabricated bash '
-                              'scripts are being stored. Ignored otherwise')
+                              'scripts are being stored. Ignored otherwise.')
     # specs
     spec = parser.add_mutually_exclusive_group(required=True)
-    spec.add_argument('--spec-file', '--spec_file', type=str, nargs=1, action='store',
+    spec.add_argument('--spec-file', '--spec_file', type=valid_file_type, nargs=1, action='store',
                       help='job specification yml file (if'
                            'not implemented in main pkg)')
     spec.add_argument('--spec-builtin', '--spec_builtin', type=built_in_spec_type, nargs=1,
@@ -167,7 +186,7 @@ def build_parser():
 
     # create the parser for the "GENSCRIPTS" command
     # -----------------------------------------------------------------------
-    genscripts = subparsers.add_parser('genscripts', help='generate user job scripts')
+    genscripts = subparsers.add_parser('gen-scripts', help='generate user job scripts')
     genscripts = add_ids_args(genscripts, required=False)
 
     # create the parser for the "CHECK" command

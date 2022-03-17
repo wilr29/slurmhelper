@@ -51,11 +51,24 @@ run_script: |
     #!/bin/bash -e
 
     echo "Begin running job ${job_id}, corresponding to:"
-    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "Subject ${subject}"
     echo "-----------------------------"
 
+
+    echo "create output dir"
+    if [ -d ${this_job_output_dir} ]; then
+        mkdir -p ${this_job_output_dir}
+    else
+        echo "No working directory detected for job ${job_id}. Skipping..."
+    fi 
+    
+    # print the input file we generated earlier
+    cat ${this_job_inputs_dir}/test_file.txt
+    
     echo "doing work stuff" > ${this_job_work_dir}/${job_id}.txt
-    echo "Job complete!" > ${path_outputs}/${job_id}.txt
+    echo "Job complete!" 
+    
+    cp -r ${this_job_work_dir}/* ${this_job_output_dir}/
 
     exit_status=$?
 
@@ -79,7 +92,7 @@ clean_script: |
     #!/bin/bash -e
     
     echo "Cleaning up for job ${job_id}, corresponding to:"
-    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "Subject ${subject}"
     echo "-----------------------------"
     
     if [ -d ${this_job_work_dir} ]; then
@@ -104,7 +117,7 @@ copy_script: |
     #!/bin/bash -e
     
     echo "Copying inputs for job ${job_id}, corresponding to:"
-    echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
+    echo "Subject ${subject}"
     echo "-----------------------------"
     
     echo "Creating directory structure"
@@ -114,8 +127,8 @@ copy_script: |
     fi
     
     echo "Copying made up inputs..."
-    touch ~/test_file.txt
-    cp ~/text_file.txt ${this_job_inputs_dir}/
+    echo "howdy" > ~/test_file.txt
+    cp ~/test_file.txt ${this_job_inputs_dir}/
     rm ~/test_file.txt
     
     echo "Done"

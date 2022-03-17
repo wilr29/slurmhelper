@@ -38,19 +38,15 @@ def get_builtin_specs():
 
     return spec_dict
 
-def load_builtin_spec(spec_tuple):
+def load_builtin_spec(spec, version):
     '''
     Leverages built in configuration from yaml file
     :param spec_tuple: tuple with format (specname, specversion). E.g., for rshrfmatlab_2021-06-01.yml, should be
     ('rshrfmatlab','2021-06-01').
     :return: dictionary with run parameters
     '''
-    spec, ver = spec_tuple
-    if spec_tuple[1] == 'latest':
-        valid_specs, latest_versions = get_builtin_specs()
-        ver = latest_versions[spec]
-    yml_name = f'{spec}_{ver}.yml'
-    return load_job_spec(os.path.join(pkg_config_dir(),yml_name))
+    yml_filename = f'{spec}_{version}.yml'
+    return load_job_spec(os.path.join(pkg_config_dir(),yml_filename))
 
 def load_job_spec(spec_file):
     '''
