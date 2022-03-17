@@ -1,0 +1,166 @@
+---
+spec_name: 'template'
+spec_version: '2022-03-17'
+
+# -------------------------------------------------
+# - Submission scripts                            -
+# -------------------------------------------------
+
+# All run script templates will be pre-formatted with these parameters.
+script_global_settings: {
+                          n_thr: 8,
+                          mem_mb: 15000,
+                          fd_thr: 0.3
+}
+
+# Header of script to be submitted to sbatch
+# Very important! this is actually substiting based on what you gave us in the inputs...
+# because sometimes you need to have memory on sbatch be higher than on your job!
+header: |
+    #!/bin/bash -e
+
+    #SBATCH --job-name=${job_name}
+    #SBATCH --output=${log_path}
+    #SBATCH --partition=broadwl
+    #SBATCH --nodes=1
+    #SBATCH --ntasks-per-node=${n_tasks}
+    #SBATCH --mem=${mem}
+    #SBATCH --time=${time}
+    ${job_array}
+
+# Preamble, might include necessary modules to be loaded
+preamble: |
+    
+    # load necessary modules
+    module load python
+
+    echo "~~~~~~~~~~~~~ BEGIN SLURM JOB ~~~~~~~~~~~~~~"
+
+# Additional stuff to add to the end of an array
+array_footer: |
+    # sanity checks
+    echo "SLURM_JOBID: " $SLURM_JOBID
+    echo "SLURM_ARRAY_TASK_ID: " $SLURM_ARRAY_TASK_ID
+    echo "SLURM_ARRAY_JOB_ID: " $SLURM_ARRAY_JOB_ID
+
+    bash ${path_to_array}
+
+    exit
+
+run_script: |
+    #!/bin/bash -e
+
+    echo "Begin running job ${job_id}, corresponding to:"
+    echo "Subject ${subject}"
+    echo "-----------------------------"
+
+
+    echo "create output dir"
+    if [ -d ${this_job_output_dir} ]; then
+        mkdir -p ${this_job_output_dir}
+    else
+        echo "No working directory detected for job ${job_id}. Skipping..."
+    fi 
+    
+    # print the input file we generated earlier
+    cat ${this_job_inputs_dir}/test_file.txt
+    
+    echo "doing work stuff" > ${this_job_work_dir}/${job_id}.txt
+    echo "Job complete!" 
+    
+    cp -r ${this_job_work_dir}/* ${this_job_output_dir}/
+
+    exit_status=$?
+
+    echo "exit status: $exit_status"
+
+    if [ $exit_status -eq 0 ]
+    then
+        echo "it appears things went well, go ahead and rm work and input dirs from scratch"
+        rm -rf ${this_job_work_dir}
+        echo "SUCCESS"
+        echo $exit_status
+        exit 0
+    else
+        echo "it appears things did not go well. we wont touch nothing"
+        echo "FAILURE"
+        echo $exit_status
+        exit 1
+    fi
+
+clean_script: |
+    #!/bin/bash -e
+    
+    echo "Cleaning up for job ${job_id}, corresponding to:"
+    echo "Subject ${subject}"
+    echo "-----------------------------"
+    
+    if [ -d ${this_job_work_dir} ]; then
+        echo "Deleting working directory for job ${job_id}..."
+        rm -rf ${this_job_work_dir}
+    else
+        echo "No working directory detected for job ${job_id}. Skipping..."
+    fi
+    
+    if [ -f ${this_job_log_file} ]; then
+        echo "Deleting log file for job ${job_id}..."
+        rm ${this_job_log_file}
+    else
+        echo "No log file detected for job ${job_id}. Skipping..."
+    fi
+    
+    echo "Done."
+    
+    exit
+
+copy_script: |
+    #!/bin/bash -e
+    
+    echo "Copying inputs for job ${job_id}, corresponding to:"
+    echo "Subject ${subject}"
+    echo "-----------------------------"
+    
+    echo "Creating directory structure"
+    
+    if [ ! -d ${this_job_inputs_dir} ]; then
+        mkdir -p ${this_job_inputs_dir}
+    fi
+    
+    echo "Copying made up inputs..."
+    echo "howdy" > ~/test_file.txt
+    cp ~/test_file.txt ${this_job_inputs_dir}/
+    rm ~/test_file.txt
+    
+    echo "Done"
+    echo "-----------------------------"
+    exit
+
+# -------------------------------------------------
+# - Inputs and outputs                            -
+# -------------------------------------------------
+
+# This contains information about the jobs to be run.
+# See example for details.
+database: '~/template.csv'
+
+# Base directory where outputs are stored
+output_path: "~/outputs"
+# Subject-specific sub-directory (e.g., for BIDS)
+output_path_subject: ['sub-{subject}']
+
+base_directory_name: 'template_batch'
+
+# -------------------------------------------------
+# - Job specification                             -
+# -------------------------------------------------
+expected_n_files: 1 # for a given run
+job_ramp_up_time: {
+                    minutes: 0
+}
+job_time: {
+            minutes: 1
+}
+max_job_time: {
+                hours: 0,
+                minutes: 1
+}

@@ -41,15 +41,15 @@ def calculate_directories(basepath, base_dir_name):
         'job_work' : os.path.join(base,'work')
     }
 
-def calculate_directories_midwayscratch(cnet, base_dir_name):
+def calculate_directories_midwayscratch(userid, base_dir_name):
     '''
     Wrapper for calculate directories function; points to user scratch
     partition in the UChicago Midway2 cluster.
-    :param cnet: CNetID of user
+    :param userid: useridID of user
     :param base_dir_name: name of working directory to be created
     :return: dict with path structure
     '''
-    basepath = os.path.join('/', 'home', cnet, 'scratch-midway2')
+    basepath = os.path.join('/', 'home', userid, 'scratch-midway2')
     return calculate_directories(basepath, base_dir_name)
 
 def initialize_directories(dirs):
