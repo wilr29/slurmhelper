@@ -1,7 +1,11 @@
 slurmhelper
 ===========
 
-[In active development]. Slurmhelper is a python tool to facilitate running large job arrays on a HPC that
-manages jobs using SLURM.
+**This is a tool currently in active development. Expect chaos and frequent changes!**
 
-This package is in very early development. More documents will be added as development progresses.
+``slurmhelper`` is a python command line tool to facilitate running large job arrays on a HPC that uses the `Slurm
+Workload Manager <https://slurm.schedmd.com/documentation.html>`_ to manage job submissions.
+
+``slurmhelper`` can be adapted to various use cases and type of jobs. It was originally designed with neuroimaging
+processing tasks in mind, but is amenable to whatever use case you may have in mind. Users may customize
+``slurmhelper`` to their needs by drafting their own :term:`spec file`.

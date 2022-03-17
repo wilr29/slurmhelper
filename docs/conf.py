@@ -33,6 +33,7 @@ release = __version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.autosectionlabel',
     'sphinxarg.ext'
 ]
 
@@ -54,6 +55,7 @@ autoclass_content = "both"  # include both class docstring and __init__
 #         "show-inheritance": True,
 #         "imported-members" : True
 # }
+autosectionlabel_prefix_document = True # have refs point to specific page.
 autosummary_generate = True  # Make _autosummary files and include them
 napoleon_numpy_docstring = False  # Force consistency, leave only Google
 napoleon_use_rtype = False  # More legible

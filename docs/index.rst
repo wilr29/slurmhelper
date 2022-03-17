@@ -7,19 +7,16 @@
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
-   source/slurmhelper
+   usage
    spec_guidelines
    guide
    example
+   glossary
+   source/slurmhelper
 
-
-Usage
------
-.. argparse::
-   :module: slurmhelper.cli.parser
-   :func: build_parser
-   :prog: slurmhelper
+For a quick applied example of usage, refer to :ref:`example:Example`.
 
 Navigation
 ==========
