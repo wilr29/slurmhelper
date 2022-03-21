@@ -127,19 +127,19 @@ Job specification
 -----------------
 
 expected_n_files
-    *Optional*. This is...
+    *Optional*. Expected number of output files to be derived. Can be used for a quick and dirty test of whether the run completed successfully.
 
 job_ramp_up_time
-    *Optional*. This is...
+    *Optional*. Ramp up time to build in to any serial job script. This might be relevant if, e.g., you are loading up MATLAB, doing some I/O task, etc.
 
 job_time
-    *Required*. This is...
+    *Required*. Estimated time for a typical job. I recommend that you test some jobs, record times, and use the 90th percentile. You must indicate this in a subdictionary with keys `hours`, `minutes`, `seconds` (see example).
 
 max_job_time
-    *Required*. This is...
+    *Required*. Maximum amount of time to spend in a serial job submission. This is the "wall time" to shoot for per serial sbatch job (or sbatch job array element). E.g., at UChicago, this is about 23 hours.
 
 Custom submission variable computation (advanced)
 -------------------------------------------------
 
 compute_function
-    *Optional*. This is...
+    *Optional*. Not yet implemented in a way that works... stay tuned! Hopefully, this would let you write your own function to compute additional fill-in variables in your run script from slurmhelper.
