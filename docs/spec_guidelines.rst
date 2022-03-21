@@ -88,10 +88,16 @@ run_script
     1. If a `script_global_settings` dictionary is defined in your spec, then any variables that are provided there will be available for substitution in any job template script. E.g., for the example defined above, `n_thr`, `mem_mb`, `fd_thr`, `path_matlab`, `path_spm`, and `path_outputs` would be made available.
     2. Any variables in your input CSV database file, including `order_id`.
     3. The following job-specific paths:
-
-        .. code-block::
-
-            TBD
+        * `output_base_dir` -- corresponds to your spec
+        * `this_job_run_script`
+        * `this_job_log_file`
+        * `this_job_inputs_dir`
+        * `this_job_work_dir`
+        * `this_job_copy_script` -- available only if `copy_script` was provided
+        * `this_job_clean_script` -- available only if `clean_script` was provided
+        * `this_job_output_dir` -- available only if `output_path_subject` was provided. Note that this should be structured as a list, with each item being a level in the directory tree, and substitution keys formatted using a similar specification and referring to variables in your CSV database file.
+        * `this_job_output_expr` -- available only if `this_job_output_dir` prerequisites and `output_path_subject_expr` were provided.
+        * `this_job_output_expr_fullpath` -- available only if requirements for `this_job_output_expr` are met.
 
 copy_script
     *Optional*. This can be used in case inputs need to be copied from another location, e.g., cold storage, prior to processing. Can also be used to move stuff to scratch for faster I/O. Please see the entry for `run_script` above for a list of all the available substitution variables for this template script.
@@ -103,19 +109,19 @@ Inputs and outputs
 ------------------
 
 database
-    *Required*. This is a...
+    *Required*. This is a CSV file that enumerates jobs and job-specific information. Must include (1) a header column, with (2) one column labeled `order_id` that takes integer positive values and (3) any additional columns you would like to include (e.g., subject, session, task, run, etc.).
 
 output_path
-    *Required*. This is...
+    *Required*. This is the base path for your outputs. Example: `/projects/mylab/studyBIDS/derivatives`
 
 output_path_subject
-    *Optional*. This is...
+    *Optional*. Useful for subject-specific paths, although I recommend maybe not using this and hardcoding in the script instead. expands the above to include subdirectories as given per each list item.
 
 output_path_subject_expr
-    *Optional*. This is...
+    *Optional*. TBD.
 
 base_directory_name
-    *Optional*. This is....
+    *Optional*. Name for the working directory structure to use with slurmhelper for your project. Defaults to `working`.
 
 Job specification
 -----------------
