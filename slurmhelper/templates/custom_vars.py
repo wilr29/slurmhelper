@@ -1,5 +1,5 @@
 def compute_custom_vars(job_dict, dirs):
-    '''
+    """
     DO NOT CHANGE THE NAME OR ARGS OF THIS FUNCTION!!!!!!
 
     This function will receive as input a dictionary representing all
@@ -41,11 +41,14 @@ def compute_custom_vars(job_dict, dirs):
     }
     :param dirs: output of ..utils.io:calculate_directories()
     :return: job_dict, plus keys you add!
-    '''
+    """
     from pathlib import Path
 
-    job_dict['run_inputs'] = str(Path(dirs['job_work']).joinpath(
-        '%05d' % job_dict['order_id']).joinpath('derivatives'))
+    job_dict["run_inputs"] = str(
+        Path(dirs["job_work"])
+        .joinpath("%05d" % job_dict["order_id"])
+        .joinpath("derivatives")
+    )
 
     # If you do not have anything to add, just return job_dict.
     return job_dict
