@@ -12,10 +12,9 @@ Submodules
     jobs
     utils
 """
-from . import cli, config, jobs, utils
+__path__ = __import__('pkgutil').extend_path(__path__, __name__)
 
 # Versioneer: add version string
 from .src._version import get_versions
-
 __version__ = get_versions()["version"]
 del get_versions
