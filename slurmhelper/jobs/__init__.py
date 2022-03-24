@@ -60,7 +60,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
         header_f = "\n".join(["""#!/bin/bash -e""", config["preamble"]])
     else:
         if args.time is not None:  # use manually specified time
-            time = args.time[0]
+            time = args.time
         else:  # calculate wall time using our current assumptions
             time = calculate_wall_time(len(job_list), config)
         # Figure out the log path
@@ -163,7 +163,7 @@ def prep_job_array(config, job_list, paths, args):
     # for all jobs submitted...
     # Wall time
     if args.time is not None:  # use manually specified time
-        time = args.time[0]
+        time = args.time
     else:  # calculate wall time using our current assumptions
         parcel_lengths = [len(p) for p in job_array]
         time = calculate_wall_time(
