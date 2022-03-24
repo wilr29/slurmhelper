@@ -1,5 +1,6 @@
 import argparse
 import os
+import datetime
 
 from ..config import get_builtin_specs
 
@@ -7,26 +8,26 @@ valid_specs = get_builtin_specs()
 valid_spec_names = valid_specs.keys()
 
 
-def wall_time_type(x):
-    """
-    Definition of a wall time type for validating in argparse.
-    :param x: list assumed to be of length 3 in order hours, minutes, seconds.
-    :return:
-    """
-    # Assertions
-    assert isinstance(x, list)
-    assert len(x) == 3
-    # Validation
-    hours = x[0]
-    minutes = x[1]
-    seconds = x[2]
-    if seconds > 59 or seconds < 0:
-        raise argparse.ArgumentTypeError("Seconds value needs to be 0 <= secs < 60")
-    elif minutes > 59 or minutes < 0:
-        raise argparse.ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
-    elif hours > 23 or hours < 0:
-        raise argparse.ArgumentTypeError("Hours value needs to be 0 <= hours < 24")
-    return x
+# def wall_time_type(x):
+#     """
+#     Definition of a wall time type for validating in argparse.
+#     :param x: list assumed to be of length 3 in order hours, minutes, seconds.
+#     :return:
+#     """
+#     # Assertions
+#     assert isinstance(x, list)
+#     assert len(x) == 3
+#     # Validation
+#     hours = x[0]
+#     minutes = x[1]
+#     seconds = x[2]
+#     if seconds > 59 or seconds < 0:
+#         raise argparse.ArgumentTypeError("Seconds value needs to be 0 <= secs < 60")
+#     elif minutes > 59 or minutes < 0:
+#         raise argparse.ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
+#     elif hours > 23 or hours < 0:
+#         raise argparse.ArgumentTypeError("Hours value needs to be 0 <= hours < 24")
+#     return x
 
 
 def built_in_spec_type(x):
@@ -92,8 +93,8 @@ def add_sbatch_args(parser):
     parser.add_argument(
         "--time",
         "-t",
-        type=wall_time_type,
-        nargs=3,
+        type=datetime.time.fromisoformat,
+        nargs=1,
         action="store",
         help="Manually specify wall time for running sbatch job. If you do, then you "
         "MUST specify hours, minutes, seconds in that order",
