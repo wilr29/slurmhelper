@@ -12,7 +12,7 @@ Submodules
     jobs
     utils
 """
-# from slurmhelper import cli, config, jobs, utils
+from . import cli, config, jobs, utils
 
 # Versioneer: add version string
 from .src._version import get_versions
