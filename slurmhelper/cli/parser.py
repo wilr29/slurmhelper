@@ -12,7 +12,8 @@ def valid_time(x):
     # some code here drawn from https://programtalk.com/python-examples/argparse.ArgumentTypeError/?ipage=3
     if not all([t.isdigit() for t in x.split(":")]):
         raise argparse.ArgumentTypeError("Invalid time format: {}".format(x))
-    if len(x.split(":") != 3):
+    print(len(x.split(":")))
+    if len(x.split(":")) != 3:
         raise argparse.ArgumentTypeError(
             "Please indicate hh:mm:ss; no more, no less: you provided {}".format(x)
         )
@@ -21,7 +22,6 @@ def valid_time(x):
         datetime.time(*map(int, x.split(":")))
     except ValueError as e:
         raise argparse.ArgumentTypeError("Invalid time format: {}".format(e))
-    return x
 
 
 # def wall_time_type(x):
@@ -110,7 +110,6 @@ def add_sbatch_args(parser):
         "--time",
         "-t",
         type=valid_time,
-        nargs=1,
         action="store",
         help="Manually specify wall time for running sbatch job. If you do, then you "
         "MUST specify hours, minutes, seconds in that order",
