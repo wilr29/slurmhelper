@@ -7,6 +7,7 @@ less grossly.
 """
 
 import os
+import logging
 from string import Template
 
 from .job import Job, TestableJob
@@ -15,6 +16,7 @@ from ..utils.io import write_job_script
 from ..utils.misc import split_list
 from ..utils.time import calculate_wall_time, calculate_min_number_of_parcels
 
+logger = logging.getLogger("cli")
 
 # Implementation of the prep portion of the script...
 def prep_job(config, job_list, paths, args, array_job_index=None):
@@ -102,15 +104,15 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
         write_job_script(job_name, args.sbatch_id[0], paths, script)
 
     if args.verbose or args.dry:
-        print(
+        logger.info(
             "script will be written to: {path}".format(
                 path=os.path.join(
                     paths["slurm_scripts"], "{name}.sh".format(name=job_name)
                 )
             )
         )
-        print("Contents of written script:\n------------------\n")
-        print(script)
+        logger.debug("Contents of written script:\n------------------\n")
+        logger.debug(script)
 
     print("========== TOTALLY DONE! YEE HAW :) ==========")
 
@@ -139,9 +141,8 @@ def prep_job_array(config, job_list, paths, args):
     job_array = split_list(job_list, wanted_parts=n_parcels)
 
     # verbose print statement because, reasons
-    if args.verbose:
-        print("JOB ARRAY IS:")
-        print(job_array)
+    logger.info("JOB ARRAY IS:")
+    logger.info(job_array)
 
     # for each parcel to include in the array
     for i in range(0, n_parcels):

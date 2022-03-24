@@ -83,7 +83,7 @@ run_script: |
     then
         echo "it appears things went well, go ahead and rm work and input dirs from scratch"
         rm -rf ${this_job_work_dir}
-        rm -rf ${this_job_inputs_dir}/derivatives
+        rm -rf ${this_job_inputs_dir}
         echo "SUCCESS"
         echo $exit_status
         exit 0
@@ -115,9 +115,9 @@ clean_script: |
         echo "No working directory detected for job ${job_id}. Skipping..."
     fi
     
-    if compgen -G "${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*" > /dev/null; then
+    if compgen -G "${this_job_output_expr_fullpath}" > /dev/null; then
         echo "Deleting partial outputs for job ${job_id}..."
-        rm ${this_job_output_expr_fullpath}/*task-${task}_run-${run_id}*
+        rm ${this_job_output_expr_fullpath}
     else
         echo "No partial outputs detected for job ${job_id}. Skipping..."
     fi

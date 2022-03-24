@@ -1,7 +1,7 @@
 import os
 import shutil
 import logging
-import sys
+import progressbar
 
 from argparse import ArgumentError
 from pprint import pprint
@@ -31,19 +31,21 @@ class SlurmhelperCLI:
     def __init__(self):
         # Build parser, and parse arguments
         parser = build_parser()
-        print(sys.argv)
         args = parser.parse_args()
 
         # copy args to the object for easier access later on :)
         self.args = args
 
+        log_format = "[%(levelname)s] - %(message)s"
         # set verbosity based on arguments!
         if args.verbose:
-            logging.basicConfig(level=20) # info
+            logging.basicConfig(level=20, format=log_format)  # info
         elif args.debug:
-            logging.basicConfig(level=10) # debug
+            logging.basicConfig(level=10, format=log_format)  # debug
         else:
-            logging.basicConfig(level=30) # warning
+            logging.basicConfig(level=30, format=log_format)  # warning
+
+        self.logger = logging.getLogger("cli")
 
         # A manual check - need user id if using midway
         if args.cluster == "midway2-scratch" and args.userid is None:
@@ -52,14 +54,16 @@ class SlurmhelperCLI:
             )
 
         print(f"Slurmhelper will run the {args.operation} operation.")
-        logging.info("Arguments specified:")
-        logging.info(args)
+        self.logger.info("Arguments specified:")
+        self.logger.info(args)
 
         # Load spec
         if args.spec_file is not None:
             self.config = load_job_spec(args.spec_file)
             if args.verbose:
-                logging.info(f"Loaded user-given specification from {args.spec_file}")
+                self.logger.info(
+                    f"Loaded user-given specification from {args.spec_file}"
+                )
         else:
             to_load = args.spec_builtin[0].split(":")
             spec = to_load[0]
@@ -69,11 +73,13 @@ class SlurmhelperCLI:
                 version = to_load[1]
             self.config = load_builtin_spec(spec, version)
             if args.verbose:
-                logging.info(f"Loaded built-in job specification: {spec} version {version}")
+                self.logger.info(
+                    f"Loaded built-in job specification: {spec} version {version}"
+                )
 
         # Calculate directories
         if "base_directory_name" not in self.config.keys():
-            print(
+            self.logger.warning(
                 "Base working dir name not specified in your spec; using default ('working')"
             )
             base_dir_name = "working"
@@ -87,7 +93,7 @@ class SlurmhelperCLI:
             self.paths = calculate_directories(args.wd_path[0], base_dir_name)
 
         if args.verbose:
-            print("Directory tree generated:")
+            self.logger.info("Directory tree generated:")
             pprint(self.paths)
 
         # Compile job list, if required
@@ -117,9 +123,8 @@ class SlurmhelperCLI:
                 )
             )
 
-            if args.verbose:
-                print("\nThese jobs are:")
-                print(self.job_list)
+            self.logger.info("\nThese jobs are:")
+            self.logger.info(self.job_list)
 
             # Leverage DB to ensure job ids provided do not exceed range, or are invalid in some other way!
             assert set(self.job_list).issubset(self.__valid_ids), (
@@ -154,7 +159,8 @@ class SlurmhelperCLI:
         copy_or_clean(self.job_list, "clean", self.paths["job_scripts"])
 
     def reset(self):
-        print("Will clean first, and copy next!")
+        self.logger.info("Will clean first, and copy next!")
+
         try:
             copy_or_clean(self.job_list, "clean", self.paths["job_scripts"])
             copy_or_clean(self.job_list, "copy", self.paths["job_scripts"])
@@ -172,21 +178,20 @@ class SlurmhelperCLI:
 
     def validate_spec(self):
         # Not yet implemented.
-        print('Not yet implemented.')
-        pass
+        self.logger.critical("Not yet implemented.")
 
     def __load_database(self):
         self.db = pd.read_csv(os.path.join(self.paths["base"], "db.csv"))
 
     def __validate_and_copy_db(self, db_file):
-        logging.info(f"validating file {db_file}")
+        self.logger.info(f"validating file {db_file}")
         if not is_valid_db(db_file):
             raise ValueError(
                 "Your DB file does not contain an order_id column. Please provide a valid db file in order"
                 "to proceed."
             )
         else:
-            logging.info("Copying file")
+            self.logger.info("Copying file")
             shutil.copy2(db_file, os.path.join(self.paths["base"], "db.csv"))
 
 

@@ -7,9 +7,12 @@ from pathlib import Path
 from string import Formatter
 
 import pandas as pd
+import logging
 
 from .job import Job
 from ..templates import compute_custom_vars
+
+logger = logging.getLogger("cli")
 
 
 def compute_helpful_vars(job_dict, dirs):
@@ -74,13 +77,13 @@ def generate_run_scripts(dirs, config, args, job_list=None):
         )
 
     if job_list is not None:
-        print(
+        logger.info(
             "job range provided, so only generating scripts for a particular subset..."
         )
         df = df[df.order_id.isin(job_list)]
         # filter rows and only keep the ones selected
     else:
-        print("no job range provided, so writing ALL the scripts.")
+        logger.warning("no job range provided, so writing ALL the scripts.")
 
     # Parse string arguments
     # Source: https://stackoverflow.com/questions/13037401/get-keys-from-template
@@ -133,9 +136,11 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     for job in job_obj_list:
         if args.verbose:
             job.print_all_params()  # pretty print available inputs
-            print("---------\n Attempting to compute scripts...\n")
+            logger.info("---------\n Attempting to compute scripts...\n")
         outcome = job.compute_scripts(config, args.verbose)
         if not outcome:  # no scripts were added?
-            print("No scripts were written. Did you forget to add needed keys?")
+            logger.critical(
+                "No scripts were written. Did you forget to add needed keys?"
+            )
         elif outcome and not args.dry:
             job.write_scripts_to_disk()

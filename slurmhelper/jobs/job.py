@@ -8,8 +8,12 @@ import copy
 import glob
 import json
 import os
+import logging
+
 from pathlib import Path
 from string import Formatter, Template
+
+logger = logging.getLogger("cli")
 
 
 class Job:
@@ -128,16 +132,14 @@ class Job:
     def _clean_params(self, fields, verbose):
         fields_rm = list(set([f for f in self._jd.keys() if f not in fields]))
 
-        if verbose:
-            print(
-                f"From the available {len(self._jd.keys())} job parameters, "
-                f"{len(fields_rm)} will be removed for formatting script."
+        logger.debug(
+            f"From the available {len(self._jd.keys())} job parameters, "
+            f"{len(fields_rm)} will be removed for formatting script."
+        )
+        if len(fields_rm) > 0:
+            logger.debug(
+                "These are: %s" % (" ".join(["'{s}'".format(s=s) for s in fields_rm]))
             )
-            if len(fields_rm) > 0:
-                print(
-                    "These are: %s"
-                    % (" ".join(["'{s}'".format(s=s) for s in fields_rm]))
-                )
 
         dd = copy.deepcopy(self._jd)
 
@@ -148,18 +150,16 @@ class Job:
         return dd
 
     def _compute_specific_script(self, operation, script_template, verbose):
-        if verbose:
-            print("Job %s: computing script %s" % (self.id, operation))
+        logger.info("Job %s: computing script %s" % (self.id, operation))
 
         # compute fields required by the template provided
         fields = list(
             set([i[1] for i in Formatter().parse(script_template) if i[1] is not None])
         )
-        if verbose:
-            print(
-                "Template for %s requires %d unique parameters:  %s"
-                % (operation, len(set(fields)), " ".join(list(set(fields))))
-            )
+        logger.debug(
+            "Template for %s requires %d unique parameters:  %s"
+            % (operation, len(set(fields)), " ".join(list(set(fields))))
+        )
 
         # Generate a dictionary with required parameters only
         fmt_dict = self._clean_params(fields, verbose)
@@ -177,12 +177,11 @@ class Job:
         )
 
         # Fill in my template!
-        if verbose:
-            print("Attempting to format script template using safe substitution...")
+        logging.debug("Attempting to format script template using safe substitution...")
         rs = Template(script_template).safe_substitute(fmt_dict)
 
-        if verbose:
-            print("Resulting script:\n %s" % (rs))
+        logging.info("Job %d: Successfully computed %s script!" % (self.id, operation))
+        logging.debug("Resulting script:\n %s" % (rs))
 
         if operation == "run":
             self.script_run = rs
@@ -225,7 +224,7 @@ class Job:
         p = Path(self._basedirs["job_scripts"])  # target path
         assert p.exists(), "target folder does not exist! ensure you initialize dir !"
         with open(p.joinpath(self._script_names[operation]), "w") as writer:
-            print(
+            logger.info(
                 "Writing job {id} {op} script to {path}".format(
                     id=self.id,
                     op=operation,
@@ -245,8 +244,6 @@ class Job:
         :return: dict, with paths.
         """
         bd = self._basedirs
-        print(bd)
-        print(self._jd)
         # add global base dirs to params
         # for base_path in bd.keys():
         #     self._jd['_'.join(['global', base_path])] = bd[base_path]

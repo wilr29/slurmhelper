@@ -4,9 +4,14 @@ Utility functions leveraged for I/O filesystem operations.
 
 import os
 import subprocess
+import logging
+import progressbar
+import time
 from pathlib import Path
 
 import pandas as pd
+
+logger = logging.getLogger("cli")
 
 
 def pkg_data_dir():
@@ -90,8 +95,8 @@ def write_job_script(job_id, sbatch_id, dirs, script):
     sbatch_name = "{job_name}.sh".format(job_name=job_id)
     path_sbatch_dir = Path(dirs["slurm_scripts"])
     if not path_sbatch_dir.exists():
-        print(
-            "WARNING: the sbatch dir does not exist. are you sure you"
+        logger.warning(
+            "The sbatch dir does not exist. are you sure you "
             "initialized this working directory tree correctly?"
             "We will make it for you, but just a heads-up..."
         )
@@ -138,8 +143,9 @@ def copy_or_clean(job_list, operation, path_scripts):
         operation == "copy" or operation == "clean"
     ), "invalid operation specified: %s" % (operation)
     print("========== BEGIN DOING STUFF ==========")
-    for job_id in job_list:
-        print(
+    for i in progressbar.progressbar(range(len(job_list)), redirect_stdout=True):
+        job_id = job_list[i]
+        logger.info(
             "----------- BEGIN DOING STUFF FOR JOB {job_id:05d} -----------".format(
                 job_id=job_id
             )
@@ -148,13 +154,13 @@ def copy_or_clean(job_list, operation, path_scripts):
             job_id=job_id, operation=operation
         )
         target_path = os.path.join(path_scripts, script_name)
-        print("RUNNING: bash {tgt_path}".format(tgt_path=target_path))
+        logger.info("RUNNING: bash {tgt_path}".format(tgt_path=target_path))
         subprocess.run(["bash", target_path])
-        print(
+        logger.info(
             "----------- DONE DOING STUFF FOR JOB {job_id:05d} -----------".format(
                 job_id=job_id
             )
         )
-    print("========== TOTALLY DONE! YEE HAW :) ==========")
+    logger.info("========== TOTALLY DONE! YEE HAW :) ==========")
 
     return
