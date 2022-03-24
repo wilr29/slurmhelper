@@ -1,21 +1,24 @@
+import os
+import shutil
+from argparse import ArgumentError
+from pprint import pprint
+
 import numpy as np
 import pandas as pd
-import shutil
-import os
-from pprint import pprint
-from argparse import ArgumentError
+
 from .parser import build_parser
+from .parser import valid_specs
+from ..config import load_builtin_spec, load_job_spec
+from ..jobs import prep_job, prep_job_array, generate_run_scripts
 from ..utils.io import (
     calculate_directories,
     calculate_directories_midwayscratch,
     copy_or_clean,
     initialize_directories,
-    is_valid_db
+    is_valid_db,
 )
 from ..utils.reporting import list_slurm, check_runs
-from ..jobs import prep_job, prep_job_array, generate_run_scripts
-from ..config import load_builtin_spec, load_job_spec
-from .parser import valid_specs
+
 
 class SlurmhelperCLI:
     """
@@ -117,9 +120,9 @@ class SlurmhelperCLI:
 
     def init(self):
         initialize_directories(self.paths)
-        self.__validate_and_copy_db(self.args['db'][0])
-        if self.args['full']:
-            self.gen_scripts() # generate template scripts for all jobs
+        self.__validate_and_copy_db(self.args["db"][0])
+        if self.args["full"]:
+            self.gen_scripts()  # generate template scripts for all jobs
 
     def list(self):
         list_slurm(self.paths)
@@ -154,15 +157,16 @@ class SlurmhelperCLI:
         check_runs(self.job_list, self.paths, self.args, self.config)
 
     def __load_database(self):
-        self.db = pd.read_csv(os.path.join(self.paths['base'], 'db.csv'))
+        self.db = pd.read_csv(os.path.join(self.paths["base"], "db.csv"))
 
     def __validate_and_copy_db(self, db_file):
         if not is_valid_db(db_file):
-            raise ValueError("Your DB file does not contain an order_id column. Please provide a valid db file in order"
-                             "to proceed.")
+            raise ValueError(
+                "Your DB file does not contain an order_id column. Please provide a valid db file in order"
+                "to proceed."
+            )
         else:
-            shutil.copy2(db_file, os.path.join(self.paths['base'],'db.csv'))
-
+            shutil.copy2(db_file, os.path.join(self.paths["base"], "db.csv"))
 
 
 def main():

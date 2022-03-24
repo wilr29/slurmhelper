@@ -5,9 +5,9 @@ Definition of Job object class, associated methods, and TestableJob class extens
 # This file contains the base job class, which is then augmented for each
 # specific use case with tests, etc.
 import copy
+import glob
 import json
 import os
-import glob
 from pathlib import Path
 from string import Formatter, Template
 

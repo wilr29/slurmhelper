@@ -6,13 +6,15 @@ of a given task, of a given session, of a given subject. Others may choose to pa
 less grossly.
 """
 
-from .scriptwriter import generate_run_scripts
+import os
+from string import Template
+
 from .job import Job, TestableJob
+from .scriptwriter import generate_run_scripts
 from ..utils.io import write_job_script
 from ..utils.misc import split_list
 from ..utils.time import calculate_wall_time, calculate_min_number_of_parcels
-import os
-from string import Template
+
 
 # Implementation of the prep portion of the script...
 def prep_job(config, job_list, paths, args, array_job_index=None):

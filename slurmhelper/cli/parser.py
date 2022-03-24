@@ -1,5 +1,6 @@
 import argparse
 import os
+
 from ..config import get_builtin_specs
 
 valid_specs = get_builtin_specs()
@@ -248,16 +249,21 @@ def build_parser():
     # -----------------------------------------------------------------------
     init = subparsers.add_parser("init", help="initialize directory structure")
     init.add_argument(
-        "--db",'-d',
+        "--db",
+        "-d",
         type=valid_file_type,
         nargs=1,
         action="store",
         help="database CSV file to use when initializing your working directory",
-        required=True
+        required=True,
     )
-    init.add_argument('--full', action='store_true', help='in addition to init, also'
-                                                          'generate run/copy/clean scripts '
-                                                          'for all user jobs.')
+    init.add_argument(
+        "--full",
+        action="store_true",
+        help="in addition to init, also"
+        "generate run/copy/clean scripts "
+        "for all user jobs.",
+    )
 
     # create the parser for the "LIST" command
     # -----------------------------------------------------------------------

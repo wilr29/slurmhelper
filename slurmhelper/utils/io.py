@@ -3,9 +3,11 @@ Utility functions leveraged for I/O filesystem operations.
 """
 
 import os
-import pandas as pd
 import subprocess
 from pathlib import Path
+
+import pandas as pd
+
 
 def pkg_data_dir():
     return os.path.join(Path(__file__).parent.parent, "data")
@@ -23,9 +25,10 @@ def load_db(db_file):
     """
     return pd.read_csv(db_file)
 
+
 def is_valid_db(db_file):
     db = load_db(db_file)
-    return 'order_id' in db.columns
+    return "order_id" in db.columns
 
 
 def calculate_directories(basepath, base_dir_name):

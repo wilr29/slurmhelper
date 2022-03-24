@@ -3,11 +3,13 @@ Functions leveraged to help create job objects from a given database, and levera
 objects' methods to write template scripts for IO or sbatch submission.
 """
 
-from ..templates import compute_custom_vars
 from pathlib import Path
 from string import Formatter
+
 import pandas as pd
+
 from .job import Job
+from ..templates import compute_custom_vars
 
 
 def compute_helpful_vars(job_dict, dirs):
@@ -24,7 +26,6 @@ def compute_helpful_vars(job_dict, dirs):
     :param dirs: output of ..utils.io:calculate_directories()
     :return: augmented job_dict
     """
-    from pathlib import Path
 
     job_dict["job_id"] = "%05d" % job_dict["order_id"]
 
@@ -58,7 +59,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     """
 
     # Read database file
-    p_csvfile = Path(dirs['base']).joinpath('db.csv')
+    p_csvfile = Path(dirs["base"]).joinpath("db.csv")
     if p_csvfile.exists():
         df = pd.read_csv(p_csvfile)
     else:

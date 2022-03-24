@@ -2,9 +2,11 @@
 Routines for parsing and loading job specification files.
 """
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
 import yaml
+
 from ..utils.io import pkg_config_dir
 from ..utils.misc import unique
 from ..utils.time import get_latest_date, datetime_valid
