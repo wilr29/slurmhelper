@@ -143,7 +143,9 @@ class SlurmhelperCLI:
     def init(self):
         initialize_directories(self.paths)
         self.__validate_and_copy_db(self.args.db[0])
+        print("Directory initialization concluded.")
         if self.args.full:
+            print("The --full flag was used, so scripts will now be generated.")
             self.gen_scripts()  # generate template scripts for all jobs
 
     def list(self):
@@ -154,6 +156,7 @@ class SlurmhelperCLI:
             generate_run_scripts(self.paths, self.config, self.args, self.job_list)
         else:
             generate_run_scripts(self.paths, self.config, self.args)
+        print("Script generation operation concluded.")
 
     def copy(self):
         copy_or_clean(self.job_list, "copy", self.paths["job_scripts"])
