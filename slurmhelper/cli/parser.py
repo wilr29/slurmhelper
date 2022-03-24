@@ -366,14 +366,14 @@ def build_parser():
     # create the parser for the "PREP" command
     # -----------------------------------------------------------------------
     prep = subparsers.add_parser("prep", help="create wrapper for serial sbatch job")
-    prep = add_parser_options(prep, "wd", "ids", "sbatch", "spec", 'dry')
+    prep = add_parser_options(prep, "wd", "ids", "sbatch", "spec", "dry")
 
     # create the parser for the "PREP-ARRAY" command
     # -----------------------------------------------------------------------
     prep_array = subparsers.add_parser(
         "prep-array", help="create wrapper for sbatch job array"
     )
-    prep_array = add_parser_options(prep_array, "wd", "ids", "sbatch", "spec", 'dry')
+    prep_array = add_parser_options(prep_array, "wd", "ids", "sbatch", "spec", "dry")
     prep_array.add_argument(
         "--n-parcels",
         "-n_parcels",

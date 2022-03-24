@@ -8,6 +8,8 @@ less grossly.
 
 import os
 import logging
+import progressbar
+
 from string import Template
 
 from .job import Job, TestableJob
@@ -41,7 +43,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
         :return: job_name: name of script to run job
     """
 
-    print("========== BEGIN DOING STUFF ==========")
+    logger.info("========== BEGIN PREPPING SERIAL JOB ==========")
     # Wall time
     if args.time is not None:  # use manually specified time
         time = "{hours:02d}:{minutes:02d}:{seconds:02d)".format(
@@ -114,7 +116,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
         logger.debug("Contents of written script:\n------------------\n")
         logger.debug(script)
 
-    print("========== TOTALLY DONE! YEE HAW :) ==========")
+    logging.info("========== TOTALLY DONE WRITING SERIAL JOB! YEE HAW :) ==========")
 
     return job_name
 
@@ -145,7 +147,7 @@ def prep_job_array(config, job_list, paths, args):
     logger.info(job_array)
 
     # for each parcel to include in the array
-    for i in range(0, n_parcels):
+    for i in progressbar.progressbar(range(0, n_parcels), redirect_stdout=True):
         # retrieve my parcel
         parcel = job_array[i]
         arr_j_i = i + 100
@@ -209,15 +211,16 @@ def prep_job_array(config, job_list, paths, args):
         # finally, write out the array script
         write_job_script(job_name, args.sbatch_id[0], paths, array_script)
 
-    if args.verbose or args.dry:
-        print(
-            "script will be written to: {path}".format(
-                path=os.path.join(
-                    paths["slurm_scripts"], "{name}.sh".format(name=job_name)
-                )
-            )
+        tgt_path = os.path.join(
+            paths["slurm_scripts"], "{name}.sh".format(name=job_name)
         )
-        print("Contents of ARRAY script:\n------------------\n")
-        print(array_script)
+
+        print(f"Array script will be written to: {tgt_path}")
+
+        logger.debug("Contents of ARRAY script:\n------------------\n")
+        logger.debug(array_script)
+        print("Done!")
+        print("Please run the following command to submit your sbatch job array:")
+        print(f"\n  sbatch {tgt_path}\n")
 
     return

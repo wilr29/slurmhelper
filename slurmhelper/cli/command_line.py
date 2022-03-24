@@ -1,7 +1,6 @@
 import os
 import shutil
 import logging
-import progressbar
 
 from argparse import ArgumentError
 from pprint import pprint
