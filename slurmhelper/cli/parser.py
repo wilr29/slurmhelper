@@ -183,7 +183,6 @@ def build_parser():
     parser.add_argument("--verbose", "-v", action="store_true")
     parser.add_argument(
         "--dry",
-        "-d",
         action="store_true",
         help="Dry run - do not execute any scripts or run commands. "
         "Useful for debugging.",
@@ -248,6 +247,17 @@ def build_parser():
     # create the parser for the "INIT" command
     # -----------------------------------------------------------------------
     init = subparsers.add_parser("init", help="initialize directory structure")
+    init.add_argument(
+        "--db",'-d',
+        type=valid_file_type,
+        nargs=1,
+        action="store",
+        help="database CSV file to use when initializing your working directory",
+        required=True
+    )
+    init.add_argument('--full', action='store_true', help='in addition to init, also'
+                                                          'generate run/copy/clean scripts '
+                                                          'for all user jobs.')
 
     # create the parser for the "LIST" command
     # -----------------------------------------------------------------------

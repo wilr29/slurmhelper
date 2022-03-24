@@ -120,9 +120,6 @@ clean_script
 Inputs and outputs
 ------------------
 
-database
-    *Required*. This is a CSV file that enumerates jobs and job-specific information. Must include (1) a header column, with (2) one column labeled `order_id` that takes integer positive values and (3) any additional columns you would like to include (e.g., subject, session, task, run, etc.).
-
 output_path
     *Required*. This is the base path for your outputs. Example: `/projects/mylab/studyBIDS/derivatives`
 

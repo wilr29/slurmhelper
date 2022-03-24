@@ -166,7 +166,7 @@ copy_script: |
 
 # This contains information about the jobs to be run.
 # See example for details.
-database: '~/rshrf_db.csv'
+# database: 'rshrf_db.csv'
 
 # Base directory where outputs are stored
 output_path: "/project2/abcd/derivatives/restingstatehrf"

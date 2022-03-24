@@ -58,7 +58,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     """
 
     # Read database file
-    p_csvfile = Path(config["database"]).expanduser()
+    p_csvfile = Path(dirs['base']).joinpath('db.csv')
     if p_csvfile.exists():
         df = pd.read_csv(p_csvfile)
     else:

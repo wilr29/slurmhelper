@@ -8,7 +8,7 @@ import re
 import time
 import pandas as pd
 from ..jobs import TestableJob
-
+from pathlib import Path
 
 def list_slurm(dirs):
     """
@@ -76,7 +76,11 @@ def check_runs(job_list, dirs, args, config):
         print("loading database....")
 
     # assumption, we use the database specified as a global earlier in the script
-    db = pd.read_csv(config["database"])
+    db_filepath = Path(dirs['base']).joinpath('db.csv')
+    if db_filepath.exists():
+        db = pd.read_csv(db_filepath)
+    else:
+        raise(FileNotFoundError, 'Database file db.csv is missing from your working directory!')
     db.sort_values("order_id")  # ensure they're sorted properly
 
     # calculate a globbing expression to check for outputs
