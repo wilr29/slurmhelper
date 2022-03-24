@@ -11,6 +11,7 @@ import logging
 import progressbar
 
 from string import Template
+from time import sleep
 
 from .job import Job, TestableJob
 from .scriptwriter import generate_run_scripts
@@ -154,6 +155,7 @@ def prep_job_array(config, job_list, paths, args):
         # make as many jobs as we want, each job is a buddy :)
         # this will write out the sub_job scripts too
         prep_job(config, parcel, paths, args, array_job_index=arr_j_i)
+        sleep(0.1)
 
     # ok, here's the array script...
     job_name = "sb-{sbatch_id:04d}".format(

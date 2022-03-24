@@ -5,6 +5,7 @@ objects' methods to write template scripts for IO or sbatch submission.
 
 from pathlib import Path
 from string import Formatter
+from time import sleep
 
 import pandas as pd
 import logging
@@ -146,3 +147,5 @@ def generate_run_scripts(dirs, config, args, job_list=None):
             )
         elif outcome and not args.dry:
             job.write_scripts_to_disk()
+
+        sleep(0.1)

@@ -6,7 +6,7 @@ import os
 import subprocess
 import logging
 import progressbar
-import time
+from time import sleep
 from pathlib import Path
 
 import pandas as pd
@@ -157,6 +157,7 @@ def copy_or_clean(job_list, operation, path_scripts):
                 job_id=job_id
             )
         )
+        sleep(0.1)
     logger.info("========== TOTALLY DONE! YEE HAW :) ==========")
 
     return
