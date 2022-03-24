@@ -56,6 +56,9 @@ array_footer: |
 
 run_script: |
     #!/bin/bash -e
+    
+    # get start time for timing runtime
+    start=`date +%s`
 
     echo "Begin running job ${job_id}, corresponding to:"
     echo "Subject ${subject}, Session ${session}, Task ${task}, Run ${run}"
@@ -84,6 +87,9 @@ run_script: |
         echo "it appears things went well, go ahead and rm work and input dirs from scratch"
         rm -rf ${this_job_work_dir}
         rm -rf ${this_job_inputs_dir}
+        end=`date +%s`
+        runtime=$((end-start))
+        echo "runtime: $runtime"
         echo "SUCCESS"
         echo $exit_status
         exit 0
