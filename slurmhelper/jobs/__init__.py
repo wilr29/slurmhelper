@@ -163,9 +163,7 @@ def prep_job_array(config, job_list, paths, args):
     # for all jobs submitted...
     # Wall time
     if args.time is not None:  # use manually specified time
-        time = "{hours:02d}:{minutes:02d}:{seconds:02d)".format(
-            hours=args.time[0], minutes=args.time[1], seconds=args.time[2]
-        )
+        time = args.time[0]
     else:  # calculate wall time using our current assumptions
         parcel_lengths = [len(p) for p in job_array]
         time = calculate_wall_time(
