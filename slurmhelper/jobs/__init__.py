@@ -46,10 +46,6 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
 
     logger.info("========== BEGIN PREPPING SERIAL JOB ==========")
     # Wall time
-    if args.time is not None:  # use manually specified time
-        time = args.time[0]
-    else:  # calculate wall time using our current assumptions
-        time = calculate_wall_time(len(job_list), config)
 
     # Give me a good job name
     if args.operation == "prep-array" and array_job_index is not None:
@@ -63,6 +59,10 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
     if args.no_header or args.operation == "prep-array":
         header_f = "\n".join(["""#!/bin/bash -e""", config["preamble"]])
     else:
+        if args.time is not None:  # use manually specified time
+            time = args.time[0]
+        else:  # calculate wall time using our current assumptions
+            time = calculate_wall_time(len(job_list), config)
         # Figure out the log path
         log_out = os.path.join(
             paths["slurm_logs"], "{job_name}.txt".format(job_name=job_name)

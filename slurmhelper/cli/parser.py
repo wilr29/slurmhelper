@@ -23,6 +23,8 @@ def valid_time(x):
     except ValueError as e:
         raise argparse.ArgumentTypeError("Invalid time format: {}".format(e))
 
+    return x
+
 
 # def wall_time_type(x):
 #     """
