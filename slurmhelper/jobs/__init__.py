@@ -47,9 +47,7 @@ def prep_job(config, job_list, paths, args, array_job_index=None):
     logger.info("========== BEGIN PREPPING SERIAL JOB ==========")
     # Wall time
     if args.time is not None:  # use manually specified time
-        time = "{hours:02d}:{minutes:02d}:{seconds:02d)".format(
-            hours=args.time[0], minutes=args.time[1], seconds=args.time[2]
-        )
+        time = args.time[0]
     else:  # calculate wall time using our current assumptions
         time = calculate_wall_time(len(job_list), config)
 
