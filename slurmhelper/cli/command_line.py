@@ -1,5 +1,8 @@
 import os
 import shutil
+import logging
+import sys
+
 from argparse import ArgumentError
 from pprint import pprint
 
@@ -28,10 +31,19 @@ class SlurmhelperCLI:
     def __init__(self):
         # Build parser, and parse arguments
         parser = build_parser()
+        print(sys.argv)
         args = parser.parse_args()
 
         # copy args to the object for easier access later on :)
         self.args = args
+
+        # set verbosity based on arguments!
+        if args.verbose:
+            logging.basicConfig(level=20) # info
+        elif args.debug:
+            logging.basicConfig(level=10) # debug
+        else:
+            logging.basicConfig(level=30) # warning
 
         # A manual check - need user id if using midway
         if args.cluster == "midway2-scratch" and args.userid is None:
@@ -40,15 +52,14 @@ class SlurmhelperCLI:
             )
 
         print(f"Slurmhelper will run the {args.operation} operation.")
-        if args.verbose:
-            print("Arguments specified:")
-            print(args)
+        logging.info("Arguments specified:")
+        logging.info(args)
 
         # Load spec
         if args.spec_file is not None:
             self.config = load_job_spec(args.spec_file)
             if args.verbose:
-                print(f"Loaded user-given specification from {args.spec_file}")
+                logging.info(f"Loaded user-given specification from {args.spec_file}")
         else:
             to_load = args.spec_builtin[0].split(":")
             spec = to_load[0]
@@ -58,12 +69,26 @@ class SlurmhelperCLI:
                 version = to_load[1]
             self.config = load_builtin_spec(spec, version)
             if args.verbose:
-                print(f"Loaded built-in job specification: {spec} version {version}")
+                logging.info(f"Loaded built-in job specification: {spec} version {version}")
 
-        # load database thingy
-        self.__load_database()
-        # get valid job ids:
-        self.__valid_ids = set(self.db.order_id.values.tolist())
+        # Calculate directories
+        if "base_directory_name" not in self.config.keys():
+            print(
+                "Base working dir name not specified in your spec; using default ('working')"
+            )
+            base_dir_name = "working"
+        else:
+            base_dir_name = self.config["base_directory_name"]
+
+        # paths!
+        if args.cluster == "midway2-scratch":
+            self.paths = calculate_directories_midwayscratch(args.userid, base_dir_name)
+        else:
+            self.paths = calculate_directories(args.wd_path[0], base_dir_name)
+
+        if args.verbose:
+            print("Directory tree generated:")
+            pprint(self.paths)
 
         # Compile job list, if required
         if not (
@@ -74,6 +99,12 @@ class SlurmhelperCLI:
                 and args.range is None
             )
         ):
+
+            # load database thingy
+            self.__load_database()
+            # get valid job ids:
+            self.__valid_ids = set(self.db.order_id.values.tolist())
+
             self.job_list = []
             if args.ids is not None:
                 self.job_list += args.ids
@@ -90,29 +121,12 @@ class SlurmhelperCLI:
                 print("\nThese jobs are:")
                 print(self.job_list)
 
-        # Leverage DB to ensure job ids provided do not exceed range, or are invalid in some other way!
-        assert set(self.job_list).issubset(self.__valid_ids), (
-            f"Some job ids provided are not in the scope of "
-            f"the csv database we are using. These are: "
-            f"{set(self.job_list) - self.__valid_ids}"
-        )
-
-        # Calculate directories
-        if "base_directory_name" not in self.config.keys():
-            print(
-                "Base working dir name not specified in your spec; using default ('working')"
+            # Leverage DB to ensure job ids provided do not exceed range, or are invalid in some other way!
+            assert set(self.job_list).issubset(self.__valid_ids), (
+                f"Some job ids provided are not in the scope of "
+                f"the csv database we are using. These are: "
+                f"{set(self.job_list) - self.__valid_ids}"
             )
-            base_dir_name = "working"
-        else:
-            base_dir_name = self.config["base_directory_name"]
-
-        if args.cluster == "midway2-scratch":
-            self.paths = calculate_directories_midwayscratch(args.userid, base_dir_name)
-        else:
-            self.paths = calculate_directories(args.wd_path[0], base_dir_name)
-        if args.verbose:
-            print("Directory tree generated:")
-            pprint(self.paths)
 
         # run my operation! :)
         operation = getattr(self, args.operation.replace("-", "_"))
@@ -120,8 +134,8 @@ class SlurmhelperCLI:
 
     def init(self):
         initialize_directories(self.paths)
-        self.__validate_and_copy_db(self.args["db"][0])
-        if self.args["full"]:
+        self.__validate_and_copy_db(self.args.db[0])
+        if self.args.full:
             self.gen_scripts()  # generate template scripts for all jobs
 
     def list(self):
@@ -156,16 +170,23 @@ class SlurmhelperCLI:
     def check(self):
         check_runs(self.job_list, self.paths, self.args, self.config)
 
+    def validate_spec(self):
+        # Not yet implemented.
+        print('Not yet implemented.')
+        pass
+
     def __load_database(self):
         self.db = pd.read_csv(os.path.join(self.paths["base"], "db.csv"))
 
     def __validate_and_copy_db(self, db_file):
+        logging.info(f"validating file {db_file}")
         if not is_valid_db(db_file):
             raise ValueError(
                 "Your DB file does not contain an order_id column. Please provide a valid db file in order"
                 "to proceed."
             )
         else:
+            logging.info("Copying file")
             shutil.copy2(db_file, os.path.join(self.paths["base"], "db.csv"))
 
 

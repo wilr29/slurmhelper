@@ -6,7 +6,6 @@ from ..config import get_builtin_specs
 valid_specs = get_builtin_specs()
 valid_spec_names = valid_specs.keys()
 
-
 def wall_time_type(x):
     """
     Definition of a wall time type for validating in argparse.
@@ -163,6 +162,140 @@ def add_ids_args(parser, required=True):
     )
     return parser
 
+def add_logging_args(parser):
+    """
+    Helper function. Adds arguments for logging to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+    # logging
+    log_level = parser.add_mutually_exclusive_group(required=False)
+    log_level.add_argument('--verbose', action='store_true')
+    log_level.add_argument('--debug', action='store_true')
+
+    return parser
+
+def add_work_dir_path_args(parser):
+    """
+    Helper function. Adds arguments for pointing to work dir to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+
+    # base folder
+    base_folder = parser.add_mutually_exclusive_group(required=True)
+    base_folder.add_argument(
+        "--cluster",
+        type=str,
+        nargs=1,
+        choices=["midway2-scratch"],
+        action="store",
+        help="Use defaults for a given HPC cluster to use. Currently, only "
+             "UChicago Midway2 (run on user scratch) is implemented.",
+    )
+    base_folder.add_argument(
+        "--wd-path",
+        "--wd_path",
+        type=valid_folder_type,
+        nargs=1,
+        action="store",
+        help="Provide your own path to create a working directory tree. "
+             "E.g., if you want this to be someplace like /project2/abcd/mystuff "
+             "(less efficient...), or for testing",
+    )
+
+    parser.add_argument(
+        "--userid",
+        type=str,
+        nargs=1,
+        action="store",
+        help="User ID (e.g., CNetID at UChicago) of the person using this. "
+             "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
+             "to scratch where the pre-fabricated bash "
+             "scripts are being stored. Ignored otherwise.",
+    )
+
+    return parser
+
+def add_spec_args(parser):
+    """
+    Helper function. Adds arguments for specifying a spec to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+    spec = parser.add_mutually_exclusive_group(required=True)
+    spec.add_argument(
+        "--spec-file",
+        "--spec_file",
+        type=valid_file_type,
+        nargs=1,
+        action="store",
+        help="job specification yml file (if" "not implemented in main pkg)",
+    )
+    spec.add_argument(
+        "--spec-builtin",
+        "--spec_builtin",
+        type=built_in_spec_type,
+        nargs=1,
+        action="store",
+        help="job specification to load from built-ins. "
+             "you may use <spec>:<version_tag> if you"
+             "would like to use a specific version. if "
+             "<spec> or <spec>:latest is provided, the latest version"
+             "will be used.",
+    )
+    return parser
+
+def add_dry_option(parser):
+    """
+    Helper function. Adds arguments for logging to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+    # top-level parser arguments
+    parser.add_argument(
+        "--dry",
+        action="store_true",
+        required=False,
+        help="Dry run - do not execute any scripts or run commands. "
+             "Useful for debugging.",
+    )
+    return parser
+
+def add_parser_options(parser, *args):
+    """
+    Helper function. Adds generic options (logging, dry, wd) to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+    allowed = {'wd','spec','dry','sbatch','ids','ids-optional'}
+    opts = set(args)
+
+    assert opts.issubset(allowed), "some of the args indicated are not yet implemented"
+    # parser = copy.deepcopy(parser)
+
+    if 'wd' in opts:
+        parser = add_work_dir_path_args(parser)
+
+    if 'sbatch' in opts:
+        parser = add_sbatch_args(parser)
+
+    if 'ids' in opts:
+        parser = add_ids_args(parser, required=True)
+
+    if 'ids-optional' in opts:
+        parser = add_ids_args(parser, required=False)
+
+    if 'spec' in opts:
+        parser = add_spec_args(parser)
+
+    # by default, always add logging
+    parser = add_logging_args(parser)
+
+    if 'dry' in opts:
+        parser = add_dry_option(parser)
+
+    return parser
 
 def build_parser():
     """
@@ -180,66 +313,7 @@ def build_parser():
         description="A utility to make running sbatch job batches on "
         "your HPC a little easier! :)",
     )
-    # top-level parser arguments
-    parser.add_argument("--verbose", "-v", action="store_true")
-    parser.add_argument(
-        "--dry",
-        action="store_true",
-        help="Dry run - do not execute any scripts or run commands. "
-        "Useful for debugging.",
-    )
-    base_folder = parser.add_mutually_exclusive_group(required=True)
-    base_folder.add_argument(
-        "--cluster",
-        type=str,
-        nargs=1,
-        choices=["midway2-scratch"],
-        action="store",
-        help="Use defaults for a given HPC cluster to use. Currently, only "
-        "UChicago Midway2 (run on user scratch) is implemented.",
-    )
-    base_folder.add_argument(
-        "--wd-path",
-        "--wd_path",
-        type=valid_folder_type,
-        nargs=1,
-        action="store",
-        help="Provide your own path to create a working directory tree. "
-        "E.g., if you want this to be someplace like /project2/abcd/mystuff "
-        "(less efficient...), or for testing",
-    )
-    parser.add_argument(
-        "--userid",
-        type=str,
-        nargs=1,
-        action="store",
-        help="User ID (e.g., CNetID at UChicago) of the person using this. "
-        "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
-        "to scratch where the pre-fabricated bash "
-        "scripts are being stored. Ignored otherwise.",
-    )
-    # specs
-    spec = parser.add_mutually_exclusive_group(required=True)
-    spec.add_argument(
-        "--spec-file",
-        "--spec_file",
-        type=valid_file_type,
-        nargs=1,
-        action="store",
-        help="job specification yml file (if" "not implemented in main pkg)",
-    )
-    spec.add_argument(
-        "--spec-builtin",
-        "--spec_builtin",
-        type=built_in_spec_type,
-        nargs=1,
-        action="store",
-        help="job specification to load from built-ins. "
-        "you may use <spec>:<version_tag> if you"
-        "would like to use a specific version. if "
-        "<spec> or <spec>:latest is provided, the latest version"
-        "will be used.",
-    )
+
 
     subparsers = parser.add_subparsers(
         title="commands", dest="operation", required=True
@@ -264,36 +338,36 @@ def build_parser():
         "generate run/copy/clean scripts "
         "for all user jobs.",
     )
+    init = add_parser_options(init, 'wd', 'spec', 'dry')
 
     # create the parser for the "LIST" command
     # -----------------------------------------------------------------------
     list = subparsers.add_parser("list", help="print a list of existing scripts")
+    list = add_parser_options(list, 'wd')
 
     # create the parser for the "COPY" command
     # -----------------------------------------------------------------------
     copy = subparsers.add_parser("copy", help="copy inputs to working directory")
-    copy = add_ids_args(copy)
+    copy = add_parser_options(copy, 'wd', 'spec', 'dry','ids')
 
     # create the parser for the "CLEAN" command
     # -----------------------------------------------------------------------
     clean = subparsers.add_parser(
         "clean", help="clean partial outputs & working " "dir data for a user job"
     )
-    clean = add_ids_args(clean)
+    clean = add_parser_options(clean, 'wd', 'spec', 'dry','ids')
 
     # create the parser for the "PREP" command
     # -----------------------------------------------------------------------
     prep = subparsers.add_parser("prep", help="create wrapper for serial sbatch job")
-    prep = add_ids_args(prep)
-    prep = add_sbatch_args(prep)
+    prep = add_parser_options(prep, 'wd','ids','sbatch','spec')
 
     # create the parser for the "PREP-ARRAY" command
     # -----------------------------------------------------------------------
     prep_array = subparsers.add_parser(
         "prep-array", help="create wrapper for sbatch job array"
     )
-    prep_array = add_ids_args(prep_array)
-    prep_array = add_sbatch_args(prep_array)
+    prep_array = add_parser_options(prep_array, 'wd','ids','sbatch','spec')
     prep_array.add_argument(
         "--n-parcels",
         "-n_parcels",
@@ -314,12 +388,12 @@ def build_parser():
     # create the parser for the "GENSCRIPTS" command
     # -----------------------------------------------------------------------
     genscripts = subparsers.add_parser("gen-scripts", help="generate user job scripts")
-    genscripts = add_ids_args(genscripts, required=False)
+    genscripts = add_parser_options(genscripts, 'wd', 'spec', 'ids-optional')
 
     # create the parser for the "CHECK" command
     # -----------------------------------------------------------------------
     check = subparsers.add_parser("check", help="run tests to validate jobs")
-    check = add_ids_args(check)
+    check = add_parser_options(check, 'wd', 'spec', 'ids')
 
     # create the parser for the "validate-spec" command
     # -----------------------------------------------------------------------
