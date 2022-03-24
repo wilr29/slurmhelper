@@ -3,6 +3,18 @@ Writing a specification
 
 Specification files are written in YAML. Not all keys listed here are required - please refer to each item as you write your spec. I recommend using an existing template as a guide. You may check if a YAML file you have written is compliant with slurmhelper's spec format using the `slurmhelper validate-spec` command.
 
+Minimal spec
+------------
+A minimal spec must include:
+
+.. code-block::
+    --
+    spec_name = 'spec'
+    spec_version = '2022-02-22'
+
+    <TBD>
+
+
 Spec definition
 --------------
 
