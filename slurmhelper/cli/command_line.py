@@ -87,8 +87,9 @@ class SlurmhelperCLI:
             base_dir_name = self.config["base_directory_name"]
 
         # paths!
-        if args.cluster == "midway2-scratch":
-            self.paths = calculate_directories_midwayscratch(args.userid, base_dir_name)
+        if args.cluster is not None:
+            if args.cluster[0] == "midway2-scratch":
+                self.paths = calculate_directories_midwayscratch(args.userid, base_dir_name)
         else:
             self.paths = calculate_directories(args.wd_path[0], base_dir_name)
 
