@@ -114,11 +114,7 @@ def write_job_script(job_id, sbatch_id, dirs, script):
     else:
         with open(path_sbatch, "w") as f:
             f.write(script)
-            print(
-                "Submission script written to {path_sbatch}".format(
-                    path_sbatch=path_sbatch
-                )
-            )
+            logger.info(f"Wrote file: {path_sbatch}")
 
     return
 
