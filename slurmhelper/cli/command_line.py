@@ -89,12 +89,14 @@ class SlurmhelperCLI:
         # paths!
         if args.cluster is not None:
             if args.cluster[0] == "midway2-scratch":
-                self.paths = calculate_directories_midwayscratch(args.userid[0], base_dir_name)
+                self.paths = calculate_directories_midwayscratch(
+                    args.userid[0], base_dir_name
+                )
         else:
             self.paths = calculate_directories(args.wd_path[0], base_dir_name)
 
-        if args.verbose:
-            self.logger.info("Directory tree generated:")
+        self.logger.info("Directory tree generated:")
+        if args.verbose or args.debug:
             pprint(self.paths)
 
         # Compile job list, if required

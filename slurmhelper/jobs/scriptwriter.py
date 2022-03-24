@@ -8,6 +8,7 @@ from string import Formatter
 
 import pandas as pd
 import logging
+import progressbar
 
 from .job import Job
 from ..templates import compute_custom_vars
@@ -133,11 +134,12 @@ def generate_run_scripts(dirs, config, args, job_list=None):
     ]
 
     # Construct scripts, and write to disk (if not dry run).
-    for job in job_obj_list:
+    for i in progressbar.progressbar(range(len(job_obj_list)), redirect_stdout=True):
+        job = job_obj_list[i]
         if args.verbose:
             job.print_all_params()  # pretty print available inputs
-            logger.info("---------\n Attempting to compute scripts...\n")
-        outcome = job.compute_scripts(config, args.verbose)
+        logger.info("---------\n Attempting to compute scripts...\n")
+        outcome = job.compute_scripts(config, args.verbose or args.debug)
         if not outcome:  # no scripts were added?
             logger.critical(
                 "No scripts were written. Did you forget to add needed keys?"
