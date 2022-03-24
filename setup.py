@@ -1,11 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 import versioneer
 
 setup(
     name='slurmhelper',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    packages=['slurmhelper'],
+    packages=find_namespace_packages(include=['slurmhelper.*']),
     url='https://github.com/fcmeyer/slurmhelper',
     license='MIT',
     author='Francisco Meyer',
