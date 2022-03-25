@@ -24,10 +24,10 @@ def pretty_cli_header(str,pad_char, n_cols=60,start_newline=True,end_newline=Tru
     end=''
 
     if start_newline:
-        start="\n"
+        start="\n" + pad_char
 
     if end_newline:
-        end='\n'
+        end='\n' + pad_char
 
     rv = [start.ljust(n_cols, pad_char),
           f"{pad_char} {str} ".ljust(n_cols, pad_char),
@@ -143,7 +143,7 @@ def pretty_print_log(log_path, head, tail, full, header=None):
             logger.warning("Did not specify valid header spec, so will use generic.")
             hdr[1] = f"= Log file: {os.path.basename(log_path)}".ljust(60, "=")
 
-    foot = ["".rjust(60, "="), f"=({str(len(lines)).zfill(6)} lines)=".rjust(60, "=")]
+    foot = ["".rjust(60, "-"), f"=({str(len(lines)).zfill(6)} lines)-".rjust(60, "-")]
 
     if full:
         print_lines = hdr + lines + foot
@@ -244,7 +244,6 @@ def check_completed(
         )
 
     # Now print stuff nicely.
-    # yee haw! :)
 
     if return_completed_list:
         rv = with_success
