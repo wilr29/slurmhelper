@@ -93,7 +93,7 @@ def check_runs(job_list, dirs, args, config):
     sfmt_glob = config["output_path_subject_expr"].format
     db["glob_output_expr"] = db.apply(lambda x: sfmt_glob(**x), 1)
 
-    sfmt_dir = config["output_path_subject"].format
+    sfmt_dir = os.path.join(config['output_path'],*config["output_path_subject"]).format
     db["output_dir"] = db.apply(lambda x: sfmt_dir(**x), 1)
 
     job_tests = [TestableJob(db, dirs, job, config) for job in job_list]

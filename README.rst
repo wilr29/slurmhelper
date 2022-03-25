@@ -15,10 +15,11 @@ processing tasks in mind, but is amenable to whatever use case you may have in m
 Requirements
 ------------
 
-- python >= 3.9
-- numpy >= 1.21.2
-- pandas >= 1.2.4
-- PyYAML >= 6.0
+- python == 3.9
+- numpy == 1.21.2
+- pandas == 1.2.4
+- PyYAML == 6.0
+- progressbar2 == 4.0.0
 
 Installation
 ------------

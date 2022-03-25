@@ -1,11 +1,6 @@
 Usage
 =====
 
-..toctree::
+.. autoprogram:: slurmhelper.cli.parser:build_parser()
+    :groups:
     :maxdepth: 2
-    :hidden:
-
-.. argparse::
-   :module: slurmhelper.cli.parser
-   :func: build_parser
-   :prog: slurmhelper

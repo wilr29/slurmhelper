@@ -17,6 +17,7 @@
       calculate_directories_midwayscratch
       copy_or_clean
       initialize_directories
+      is_valid_db
       load_db
       pkg_config_dir
       pkg_data_dir
