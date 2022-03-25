@@ -145,7 +145,7 @@ def check_completed(
 
             if failed_report:
                 print("~~~~~~ job logs ~~~~~~~")
-                failed_jobs = list(set(with_logs) - set(with_success))
+                failed_jobs = list(filter(lambda x: str(x) in failed_job_ids, with_logs))
                 for job in failed_jobs:
                     job.print_job_log()
             else:
