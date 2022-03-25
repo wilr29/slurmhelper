@@ -244,6 +244,7 @@ def check_completed(
         )
 
     # Now print stuff nicely.
+    # yee haw!
 
     if return_completed_list:
         rv = with_success
