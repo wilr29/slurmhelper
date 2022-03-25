@@ -11,6 +11,7 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from pprint import pprint
+import cmd
 
 import pandas as pd
 
@@ -79,39 +80,65 @@ def check_queue():
     pprint(df)
 
 
-def check_completed():
+def check_completed(dirs, config, job_list=None, return_completed_list=False):
     # if job list is none, assume all of them are the ones we care about...
     # basically copypaste from check_runtimes
-    pass
+
+    logger.info(f"Building job objects...")
+    if job_list is None:
+        logger.warning('No ids or range of ids were provided, '
+                       'so will consider at all jobs in the database.')
+    job_obj_list = build_job_objects(dirs, config, job_list)
+
+    with_logs = list(filter(lambda x: x.has_job_log, job_obj_list))
+
+    if return_completed_list and len(with_logs) < len(job_obj_list):
+        logger.warning(
+            f"Of the {len(job_obj_list)} total job ids considered,"
+            f"only {len(with_logs)} of those have valid log files."
+        )
+
+    with_success = list(filter(lambda x: x.ran_successfully, with_logs))
+
+    if return_completed_list and len(with_logs) < len(job_list):
+        logger.warning(
+            f"Of the {len(with_logs)} jobs with logs, only "
+            f"{len(with_success)} appear to have completed successfully."
+        )
+
+    # Now print stuff nicely.
+
+    if return_completed_list:
+        rv = with_success
+    else:
+        rv = None
+        failed_jobs = list(set([str(job) for job in job_obj_list]) - set([str(job) for job in with_success]))
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~ slurmhelper check completed: results ~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print(f"jobs considered: {len(job_list)}")
+        print(f"logs exist in logs/jobs/_____.txt: {len(with_logs)} ({len(with_logs)*100/len(job_list)}% of considered)")
+        print(f"logs indicate success: {len(with_success)}")
+        print(f'    ({len(with_success)*100/len(job_list)}% of considered);')
+        print(f'    ({len(with_success)*100/len(with_logs)}% of considered w/ existing logs);')
+        if len(failed_jobs) > 0:
+            print(f"\nfailed jobs (n = {len(failed_jobs)}):")
+            chunks = [failed_jobs[x:x + 4] for x in range(0, len(failed_jobs), 4)]
+            print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in chunks]))
+
+    return rv
 
 
-# It's checking the runtime of each job.
-def check_runtimes(job_list, dirs, config):
+
+def check_runtimes(dirs, config, job_list=None):
     # assumptions about runtime: formatting, position
     # runtime_unit = seconds
     runtime_unit = "seconds"
     runtime_line_position = -3
     runtime_strip_str = "runtime: "
 
-    logging.info(f"Building job objects for {len(job_list)} jobs...")
-
-    job_list = build_job_objects(dirs, config, job_list)
-
-    with_logs = list(filter(lambda x: x.has_job_log, job_list))
-
-    if len(with_logs) < len(job_list):
-        logger.warning(
-            f"You indicated {len(job_list)} jobs to check, but"
-            f"only {len(with_logs)} of those have valid log files."
-        )
-
-    with_success = list(filter(lambda x: x.ran_successfully, with_logs))
-
-    if len(with_logs) < len(job_list):
-        logger.warning(
-            f"Of the {len(with_logs)} jobs with logs, only "
-            f"{len(with_success)} appear to have completed successfully."
-        )
+    with_success = check_completed(dirs,config,job_list,
+                                   return_completed_list=True)
 
     runtimes = []
     for job in with_success:

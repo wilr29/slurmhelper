@@ -66,12 +66,12 @@ def build_job_objects(dirs, config, job_list=None):
 
     if job_list is not None:
         logger.info(
-            "job range provided, so only generating scripts for a particular subset..."
+            "job range provided, so only looking at jobs for a particular subset..."
         )
         df = df[df.order_id.isin(job_list)]
         # filter rows and only keep the ones selected
     else:
-        logger.warning("no job range provided, so writing ALL the scripts.")
+        logger.warning("no job range provided, so looking at ALL the jobs.")
 
     # Parse string arguments
     # Source: https://stackoverflow.com/questions/13037401/get-keys-from-template
