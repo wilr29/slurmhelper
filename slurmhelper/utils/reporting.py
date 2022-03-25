@@ -15,7 +15,6 @@ import cmd
 
 import pandas as pd
 
-from ..jobs.classes import TestableJob
 from ..jobs.utils import build_job_objects
 
 logger = logging.getLogger("cli")
@@ -311,6 +310,8 @@ def check_runs(job_list, dirs, args, config):
     :param config: config parameter dictionary
     :return:
     """
+    from ..jobs.classes import TestableJob
+
     if len(job_list) < 1:
         raise ValueError("Job list length should be greater than 0")
 

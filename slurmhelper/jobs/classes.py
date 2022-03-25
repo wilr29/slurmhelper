@@ -6,8 +6,6 @@ import os
 from pathlib import Path
 from string import Template, Formatter
 
-from ..utils.reporting import read_log_file_lines, pretty_print_log
-
 logger = logging.getLogger("cli")
 
 
@@ -315,6 +313,8 @@ class Job:
         return lines[-1] == "0"
 
     def read_job_log_lines(self):
+        from ..utils.reporting import read_log_file_lines
+
         if not self.has_job_log:
             raise FileNotFoundError(
                 f"No log file is available for job {self.id} in "
@@ -330,6 +330,8 @@ class Job:
         :param line_trim: how many lines to show from top and bottom
         :return:
         """
+        from ..utils.reporting import pretty_print_log
+
         pretty_print_log(
             self._jd["this_job_log_file"], head=head, tail=tail, full=full, header="job"
         )
