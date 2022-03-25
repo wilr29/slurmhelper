@@ -18,8 +18,8 @@ def pkg_data_dir():
     return os.path.join(Path(__file__).parent.parent, "data")
 
 
-def pkg_config_dir():
-    return os.path.join(Path(__file__).parent.parent, "config")
+def pkg_specs_dir():
+    return os.path.join(Path(__file__).parent.parent, "specs")
 
 
 def load_db(db_file):

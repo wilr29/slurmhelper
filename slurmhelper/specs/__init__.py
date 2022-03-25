@@ -1,81 +1,70 @@
 """
-Module for handling spec-related stuff.
+Routines for parsing and loading job specification files.
 """
 import os
 from datetime import timedelta
+from pathlib import Path
 
 import yaml
 
-# TODO: I would ideally like to leverage the Cerberus package to
-#       validate schema stuff. But alas, that is for a later time...
-
-# Required keys that must be indicated for any spec
-spec_required_keys = {
-    "spec_name",
-    "spec_version",
-    "header",
-    "run_script",
-    "database",
-    "output_path",
-    "job_time",
-    "max_job_time",
-}
-
-# Optional keys. Not needed for a spec, but allowed.
-spec_optional_keys = {
-    "preamble",
-    "array_footer",
-    "script_global_settings",
-    "copy_script",
-    "clean_script",
-    "output_path_subject",
-    "output_path_subject_expr",
-    "base_directory_name",
-    "job_ramp_up_time",
-    "expected_n_files",
-    "compute_function",
-}
+from ..utils.io import pkg_specs_dir
+from ..utils.misc import unique
+from ..utils.time import get_latest_date, datetime_valid
 
 
-class JobSpec:
-    def __init__(self, yaml_file):
+def get_builtin_specs():
+    """
+    Produces a list of all available specs
+    :return:
+    """
 
-        self._spec_dict = self.load_job_spec(yaml_file)
-        self.validate_spec()
+    # get list of available dicts, assuming the _ separates name_version
+    specs = [s.stem.split("_") for s in Path(pkg_specs_dir()).glob("*.yml")]
 
-    def load_job_spec(spec_file):
-        """
-        Read job-specific globals from a pre-configured YAML file
-        :param spec_file: path to YAML file to read
-        :return: dictionary with specification
-        """
-        assert os.path.exists(spec_file), f"{spec_file} does not exist!"
+    # gives us list of tuples with valid combinations
+    valid_specs = [(s[0], s[1]) for s in specs]
 
-        try:
-            with open(spec_file, "r") as file:
-                spec_dict = yaml.load(file, Loader=yaml.FullLoader)
-        except:
-            raise ValueError(f"Error loading {spec_file}. Is this a valid YAML file?")
+    # for identifying latest spec:
+    spec_names = unique([l[0] for l in specs])
+    spec_dict = {name: {"versions": []} for name in spec_names}
+    for spec in specs:
+        spec_dict[spec[0]]["versions"].append(spec[1])
 
-        # parse time variables into timedeltas
-        spec_dict = {
-            k: (timedelta(**v) if "time" in k else v) for (k, v) in spec_dict.items()
-        }
+    # identify latest version for a given spec
+    for spec in spec_dict.keys():
+        if True in list(map(datetime_valid, spec_dict[spec]["versions"])):
+            # get max from files with datetimes
+            dates = list(filter(datetime_valid, spec_dict[spec]["versions"]))
+            spec_dict[spec]["latest"] = get_latest_date(dates)
 
-        return spec_dict
+    # print(spec_dict)
 
-    def validate_spec(self):
-        spec = self._spec_dict
-        # ensure all mandatory keys are present
-        # works b/c set math: {a, b, c} - {a, b, c, x, y, z} should == {}
-        assert len(spec_required_keys - spec.keys()) == 0, (
-            f"Some required keys are not "
-            f"defined in your spec. these are: "
-            f"{' '.join(list(spec_required_keys - spec.keys()))}"
-        )
-        # warn user if optional keys that are not defined were include
-        # if (len(spec_required_keys.union(spec_optional_keys) - spec.keys()) > 0):
-        #    logging.warn('Variables ;...')
+    return spec_dict
 
-    def __str__(self):
-        pass
+
+def load_builtin_spec(spec, version):
+    """
+    Leverages built in configuration from yaml file
+    :param spec_tuple: tuple with format (specname, specversion). E.g., for rshrfmatlab_2021-06-01.yml, should be
+    ('rshrfmatlab','2021-06-01').
+    :return: dictionary with run parameters
+    """
+    yml_filename = f"{spec}_{version}.yml"
+    return load_job_spec(os.path.join(pkg_specs_dir(), yml_filename))
+
+
+def load_job_spec(spec_file):
+    """
+    Read job-specific globals from a pre-configured YAML file
+    :param spec_file: path to YAML file to read
+    :return: dictionary with specification
+    """
+    with open(spec_file, "r") as file:
+        spec_dict = yaml.load(file, Loader=yaml.FullLoader)
+
+    # parse times into timedeltas
+    spec_dict = {
+        k: (timedelta(**v) if "time" in k else v) for (k, v) in spec_dict.items()
+    }
+
+    return spec_dict

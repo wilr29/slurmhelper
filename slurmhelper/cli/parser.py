@@ -2,7 +2,7 @@ import argparse
 import datetime
 import os
 
-from ..config import get_builtin_specs
+from slurmhelper.specs import get_builtin_specs
 
 valid_specs = get_builtin_specs()
 valid_spec_names = valid_specs.keys()

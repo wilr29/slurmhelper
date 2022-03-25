@@ -1,15 +1,14 @@
 import logging
 import os
 import shutil
-from argparse import ArgumentError
 import pprint
 
 import numpy as np
 import pandas as pd
 
-from .parser import build_parser
+from argparse import ArgumentError
+
 from .parser import valid_specs
-from ..config import load_builtin_spec, load_job_spec
 from ..jobs.cli_helpers import prep_job, prep_job_array, generate_run_scripts
 from ..utils.io import (
     calculate_directories,
@@ -33,6 +32,8 @@ class SlurmhelperCLI:
     """
 
     def __init__(self):
+        from .parser import build_parser
+
         # Build parser, and parse arguments
         parser = build_parser()
         args = parser.parse_args()
@@ -109,6 +110,8 @@ class SlurmhelperCLI:
         self.logger = logging.getLogger("cli")
 
     def __initialize_config(self):
+        from slurmhelper.specs import load_builtin_spec, load_job_spec
+
         if self.args.spec_file is not None:
             self.config = load_job_spec(self.args.spec_file)
             self.logger.info(
