@@ -172,9 +172,35 @@ class SlurmhelperCLI:
             raise e
 
     def prep(self):
+        if self.args.do_reset:
+            print(
+                "The --do-reset flag was used. Clean and then copy will be run prior "
+                "to job prep for pertinent ids."
+            )
+            self.reset()
+        elif self.args.do_clean:
+            print(
+                "The --do-clean flag was used. Clean scripts will be run for affected job ids "
+                "prior to sbatch submission script prep."
+            )
+            self.clean()
+
         prep_job(self.config, self.job_list, self.paths, self.args)
 
     def prep_array(self):
+        if self.args.do_reset:
+            print(
+                "The --do-reset flag was used. Clean and then copy will be run prior "
+                "to job prep for pertinent ids."
+            )
+            self.reset()
+        elif self.args.do_clean:
+            print(
+                "The --do-clean flag was used. Clean scripts will be run for affected job ids "
+                "prior to sbatch submission script prep."
+            )
+            self.clean()
+
         prep_job_array(self.config, self.job_list, self.paths, self.args)
 
     def check(self):

@@ -286,13 +286,44 @@ def add_dry_option(parser):
     return parser
 
 
+def add_clean_and_copy_flag(parser):
+    """
+    Helper function. Adds clean and copy (for prep commands) flags to parser object.
+    :param parser: subcommand parser object
+    :return: parser (enhanced with new arguments!)
+    """
+    # top-level parser arguments
+    cc_flags = parser.add_mutually_exclusive_group()
+    cc_flags.add_argument(
+        "--do-reset",
+        "--do_reset",
+        action="store_true",
+        required=False,
+        help="Execute <reset> command for job ids being prepped (run clean scripts to remove partial outputs and logs, "
+        "and then run copy scripts to ensure inputs are present in wd). Especially useful "
+        "if you are rerunning stuff that failed before, or if you have a project where inputs need to be "
+        "copied prior to runtime. ",
+    )
+    cc_flags.add_argument(
+        "--do-clean",
+        action="store_true",
+        required=False,
+        help="Also execute <clean> command for job ids being prepped "
+        "(run clean scripts to remove partial outputs and logs)."
+        "Especially useful "
+        "if you are rerunning stuff that failed before, and you don't have any inputs that need to be "
+        "copied prior to runtime. ",
+    )
+    return parser
+
+
 def add_parser_options(parser, *args):
     """
     Helper function. Adds generic options (logging, dry, wd) to parser object.
     :param parser: subcommand parser object
     :return: parser (enhanced with new arguments!)
     """
-    allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional"}
+    allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc"}
     opts = set(args)
 
     assert opts.issubset(allowed), "some of the args indicated are not yet implemented"
@@ -318,6 +349,9 @@ def add_parser_options(parser, *args):
 
     if "dry" in opts:
         parser = add_dry_option(parser)
+
+    if "do-cc" in opts:
+        parser = add_clean_and_copy_flag(parser)
 
     return parser
 
@@ -384,14 +418,16 @@ def build_parser():
     # create the parser for the "PREP" command
     # -----------------------------------------------------------------------
     prep = subparsers.add_parser("prep", help="create wrapper for serial sbatch job")
-    prep = add_parser_options(prep, "wd", "ids", "sbatch", "spec", "dry")
+    prep = add_parser_options(prep, "wd", "ids", "sbatch", "spec", "dry", "do-cc")
 
     # create the parser for the "PREP-ARRAY" command
     # -----------------------------------------------------------------------
     prep_array = subparsers.add_parser(
         "prep-array", help="create wrapper for sbatch job array"
     )
-    prep_array = add_parser_options(prep_array, "wd", "ids", "sbatch", "spec", "dry")
+    prep_array = add_parser_options(
+        prep_array, "wd", "ids", "sbatch", "spec", "dry", "do-cc"
+    )
     prep_array.add_argument(
         "--n-parcels",
         "-n_parcels",
