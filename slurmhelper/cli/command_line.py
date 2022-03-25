@@ -48,7 +48,7 @@ class SlurmhelperCLI:
                 "If you are using midway2-scratch, you must provide your user ID!"
             )
 
-        print(f"Slurmhelper will run the {args.operation} operation.")
+        print(f"\nSlurmhelper will run the {args.operation} operation.")
 
         self.logger.info("Arguments specified:")
         self.logger.info(args)

@@ -124,9 +124,9 @@ def check_completed(
             set([str(job) for job in with_logs])
             - set([str(job) for job in with_success])
         )
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~ slurmhelper check completed: results ~~~~~~~~")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
         print(f"jobs considered: {len(job_obj_list)}")
         print(
             f"logs exist in logs/jobs/<order_id>.txt: {len(with_logs)} ({len(with_logs)*100/len(job_obj_list)}% of considered)"
@@ -136,10 +136,10 @@ def check_completed(
         print(
             f"    ({len(with_success)*100/len(with_logs)}% of considered w/ existing logs);"
         )
-        if len(failed_job_ids) > 0:
+        if len(no_logs_ids) > 0:
             print(f"\njobs without logfiles (n = {len(no_logs_ids)})")
             pretty_print_job_ids(no_logs_ids)
-
+        if len(failed_job_ids) > 0:
             print(f"\nfailed jobs (n = {len(failed_job_ids)}):")
             pretty_print_job_ids(failed_job_ids)
 
@@ -152,7 +152,7 @@ def check_completed(
                     job.print_job_log()
             else:
                 print(
-                    "\nTip: rerun with --show-failed-logs flag to print out job logs available for failed jobs"
+                    "\nTip: rerun with --show-failed-logs flag to print out job logs available for failed jobs\n"
                 )
 
     return rv
