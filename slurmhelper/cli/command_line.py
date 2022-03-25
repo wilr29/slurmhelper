@@ -206,6 +206,12 @@ class SlurmhelperCLI:
                 "prior to sbatch submission script prep."
             )
             self.clean()
+        elif self.args.do_copy:
+            print(
+                "The --do-copyflag was used. Input copy scripts will be run for affected job ids "
+                "prior to sbatch submission script prep."
+            )
+            self.copy()
 
         prep_job_array(self.config, self.job_list, self.paths, self.args)
 
