@@ -291,8 +291,6 @@ class SlurmhelperCLI:
                 tail=self.args.tail,
                 full=self.args.full,
             )
-
-            check_log()
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
