@@ -1,4 +1,4 @@
-slurmhelper.utils.reporting
+﻿slurmhelper.utils.reporting
 ===========================
 
 .. automodule:: slurmhelper.utils.reporting
@@ -14,6 +14,7 @@ slurmhelper.utils.reporting
    .. autosummary::
    
       check_runs
+      check_runtime_avg
       list_slurm
    
    

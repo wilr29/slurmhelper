@@ -14,6 +14,7 @@
    .. autosummary::
    
       check_runs
+      check_runtime_avg
       list_slurm
    
    

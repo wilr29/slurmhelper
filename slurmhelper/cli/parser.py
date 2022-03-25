@@ -299,20 +299,32 @@ def add_clean_and_copy_flag(parser):
         "--do_reset",
         action="store_true",
         required=False,
-        help="Execute <reset> command for job ids being prepped (run clean scripts to remove partial outputs and logs, "
+        help="Execute <reset> command PRIOR to prep/prep-array, for the same job ids being prepped "
+        "i.e., (run clean scripts to remove partial outputs and logs, "
         "and then run copy scripts to ensure inputs are present in wd). Especially useful "
-        "if you are rerunning stuff that failed before, or if you have a project where inputs need to be "
+        "if you are rerunning stuff that failed before, in a project where inputs need to be "
         "copied prior to runtime. ",
     )
     cc_flags.add_argument(
         "--do-clean",
+        "--do_clean",
         action="store_true",
         required=False,
-        help="Also execute <clean> command for job ids being prepped "
+        help="Execute <clean> command PRIOR to prep/prep-array, for job ids being prepped "
         "(run clean scripts to remove partial outputs and logs)."
         "Especially useful "
         "if you are rerunning stuff that failed before, and you don't have any inputs that need to be "
         "copied prior to runtime. ",
+    )
+    cc_flags.add_argument(
+        "--do-copy",
+        "--do_copy",
+        action="store_true",
+        required=False,
+        help="Execute <copy> command PRIOR to prep/prep-array, for job ids being prepped "
+        "(run clean scripts to remove partial outputs and logs)."
+        "Especially useful if your jobs need you to copy inputs prior to runtime, and you are a"
+        "forgetful person like me...",
     )
     return parser
 

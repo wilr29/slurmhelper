@@ -310,7 +310,7 @@ class Job:
     def ran_successfully(self):
         # assumption: exit code is last line!
         lines = self.read_job_log_lines()
-        return lines[-1] == '0'
+        return lines[-1] == "0"
 
     def read_job_log_lines(self):
         if not self.has_job_log:
