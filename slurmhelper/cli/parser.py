@@ -442,7 +442,7 @@ def build_parser():
     )
     prep_array.add_argument(
         "--n-parcels",
-        "-n_parcels",
+        "--n_parcels",
         nargs=1,
         type=int,
         action="store",
