@@ -99,7 +99,7 @@ def check_runtime_avg(job_list, dirs, config):
         runtimes.append(rt)
 
     # print out descriptive stats! :)
-    pd.DataFrame(runtimes, columns=["runtime"]).describe()
+    print(pd.DataFrame(runtimes, columns=["runtime"]).describe())
 
 
 def check_runs(job_list, dirs, args, config):
