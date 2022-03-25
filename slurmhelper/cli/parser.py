@@ -483,6 +483,12 @@ def build_parser():
         "completion", help="survey which jobs have been completed so far"
     )
     check_completed = add_parser_options(check_completed, "wd", "spec", "ids-optional")
+    check_completed.add_argument(
+        "--show-failed-logs",
+        "--show_failed_logs",
+        help="print the job logs for failed jobs",
+        action="store_true",
+    )
 
     # create the parser for the "validate-spec" command
     # -----------------------------------------------------------------------

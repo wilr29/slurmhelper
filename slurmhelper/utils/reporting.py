@@ -80,7 +80,14 @@ def check_queue():
     pprint(df)
 
 
-def check_completed(dirs, config, job_list=None, return_completed_list=False):
+def pretty_print_job_ids(ids_list, n_cols=5):
+    chunks = [ids_list[x : x + n_cols] for x in range(0, len(ids_list), n_cols)]
+    print("\n".join(["\t".join([str(cell) for cell in row]) for row in chunks]))
+
+
+def check_completed(
+    dirs, config, failed_report=False, job_list=None, return_completed_list=False
+):
     # if job list is none, assume all of them are the ones we care about...
     # basically copypaste from check_runtimes
 
@@ -109,8 +116,12 @@ def check_completed(dirs, config, job_list=None, return_completed_list=False):
         rv = with_success
     else:
         rv = None
-        failed_jobs = list(
+        no_logs_ids = list(
             set([str(job) for job in job_obj_list])
+            - set([str(job) for job in with_logs])
+        )
+        failed_job_ids = list(
+            set([str(job) for job in with_logs])
             - set([str(job) for job in with_success])
         )
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -118,17 +129,29 @@ def check_completed(dirs, config, job_list=None, return_completed_list=False):
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print(f"jobs considered: {len(job_obj_list)}")
         print(
-            f"logs exist in logs/jobs/_____.txt: {len(with_logs)} ({len(with_logs)*100/len(job_obj_list)}% of considered)"
+            f"logs exist in logs/jobs/<order_id>.txt: {len(with_logs)} ({len(with_logs)*100/len(job_obj_list)}% of considered)"
         )
         print(f"logs indicate success: {len(with_success)}")
         print(f"    ({len(with_success)*100/len(job_obj_list)}% of considered);")
         print(
             f"    ({len(with_success)*100/len(with_logs)}% of considered w/ existing logs);"
         )
-        if len(failed_jobs) > 0:
-            print(f"\nfailed jobs (n = {len(failed_jobs)}):")
-            chunks = [failed_jobs[x : x + 4] for x in range(0, len(failed_jobs), 4)]
-            print("\n".join(["\t".join([str(cell) for cell in row]) for row in chunks]))
+        if len(failed_job_ids) > 0:
+            print(f"\njobs without logfiles (n = {len(no_logs_ids)})")
+            pretty_print_job_ids(no_logs_ids)
+
+            print(f"\nfailed jobs (n = {len(failed_job_ids)}):")
+            pretty_print_job_ids(failed_job_ids)
+
+            if failed_report:
+                print("~~~~~~ job logs ~~~~~~~")
+                failed_jobs = list(set(with_logs) - set(with_success))
+                for job in failed_jobs:
+                    job.print_job_log()
+            else:
+                print(
+                    "\nTip: rerun with --show-failed-logs flag to print out job logs available for failed jobs"
+                )
 
     return rv
 
@@ -140,7 +163,9 @@ def check_runtimes(dirs, config, job_list=None):
     runtime_line_position = -3
     runtime_strip_str = "runtime: "
 
-    with_success = check_completed(dirs, config, job_list, return_completed_list=True)
+    with_success = check_completed(
+        dirs, config, job_list, failed_report=False, return_completed_list=True
+    )
 
     runtimes = []
     for job in with_success:
