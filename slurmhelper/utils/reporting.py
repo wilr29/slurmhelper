@@ -84,7 +84,7 @@ def check_runtime_avg(job_list, dirs, config):
             f"only {len(with_logs)} of those have valid log files."
         )
 
-    with_success = list(filter(lambda x: x.__read_job_log()[-1] == "0", with_logs))
+    with_success = list(filter(lambda x: x.read_job_log_lines()[-1] == "0", with_logs))
 
     if len(with_logs) < len(job_list):
         logger.warning(

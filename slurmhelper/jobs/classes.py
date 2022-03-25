@@ -306,7 +306,7 @@ class Job:
     def has_job_log(self):
         return os.path.exists(self._jd["this_job_log_file"])
 
-    def __read_job_log(self):
+    def read_job_log_lines(self):
         if not self.has_job_log:
             raise FileNotFoundError(
                 f"No log file is available for job {self.id} in "
@@ -334,7 +334,7 @@ class Job:
         :param line_trim: how many lines to show from top and bottom
         :return:
         """
-        lines = self.__read_job_log()
+        lines = self.read_job_log_lines()
 
         hdr = [
             f"=====================================================",
