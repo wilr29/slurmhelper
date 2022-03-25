@@ -85,11 +85,6 @@ def check_completed(dirs, config, job_list=None, return_completed_list=False):
     # basically copypaste from check_runtimes
 
     logger.info(f"Building job objects...")
-    if job_list is None:
-        logger.warning(
-            "No ids or range of ids were provided, "
-            "so will consider at all jobs in the database."
-        )
     job_obj_list = build_job_objects(dirs, config, job_list)
 
     with_logs = list(filter(lambda x: x.has_job_log, job_obj_list))
@@ -121,12 +116,12 @@ def check_completed(dirs, config, job_list=None, return_completed_list=False):
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~ slurmhelper check completed: results ~~~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print(f"jobs considered: {len(job_list)}")
+        print(f"jobs considered: {len(job_obj_list)}")
         print(
-            f"logs exist in logs/jobs/_____.txt: {len(with_logs)} ({len(with_logs)*100/len(job_list)}% of considered)"
+            f"logs exist in logs/jobs/_____.txt: {len(with_logs)} ({len(with_logs)*100/len(job_obj_list)}% of considered)"
         )
         print(f"logs indicate success: {len(with_success)}")
-        print(f"    ({len(with_success)*100/len(job_list)}% of considered);")
+        print(f"    ({len(with_success)*100/len(job_obj_list)}% of considered);")
         print(
             f"    ({len(with_success)*100/len(with_logs)}% of considered w/ existing logs);"
         )
