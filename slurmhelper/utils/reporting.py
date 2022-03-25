@@ -86,7 +86,7 @@ def pretty_print_job_ids(ids_list, n_cols=5):
 
 
 def check_completed(
-    dirs, config, failed_report=False, job_list=None, return_completed_list=False
+    dirs, config, job_list=None, return_completed_list=False, failed_report=False
 ):
     # if job list is none, assume all of them are the ones we care about...
     # basically copypaste from check_runtimes

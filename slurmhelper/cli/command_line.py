@@ -258,7 +258,13 @@ class SlurmhelperCLI:
         elif self.args.check_operation == "runtime":
             check_runtimes(self.paths, self.config, jl)
         elif self.args.check_operation == "completion":
-            check_completed(self.paths, self.config, jl)
+            check_completed(
+                self.paths,
+                self.config,
+                job_list=jl,
+                return_completed_list=False,
+                failed_report=self.args.show_failed_logs,
+            )
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
