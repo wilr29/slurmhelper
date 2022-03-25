@@ -7,7 +7,10 @@ import logging
 import os
 import re
 import time
+import subprocess
 from pathlib import Path
+from io import StringIO
+from pprint import pprint
 
 import pandas as pd
 
@@ -66,7 +69,22 @@ def list_slurm(dirs):
     return
 
 
-def check_runtime_avg(job_list, dirs, config):
+def check_queue():
+    # assumes slurm
+    out = subprocess.check_output(["squeue", "-u", "$USER"], encoding="UTF-8")
+    df = pd.read_fwf(StringIO(out))
+    # TODO: merge this with info on sbatch thingys, then do some magic to make it more informative!
+    pprint(df)
+
+
+def check_completed():
+    # if job list is none, assume all of them are the ones we care about...
+    # basically copypaste from check_runtimes
+    pass
+
+
+# It's checking the runtime of each job.
+def check_runtimes(job_list, dirs, config):
     # assumptions about runtime: formatting, position
     # runtime_unit = seconds
     runtime_unit = "seconds"

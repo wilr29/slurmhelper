@@ -465,7 +465,24 @@ def build_parser():
     # create the parser for the "CHECK" command
     # -----------------------------------------------------------------------
     check = subparsers.add_parser("check", help="run tests to validate jobs")
-    check = add_parser_options(check, "wd", "spec", "ids")
+    check_subparsers = check.add_subparsers(
+        title="checking operations", dest="check_operation", required=True
+    )
+    # Operations of checks that can be done
+    # ~~~ status ~~~
+    check_queue = check_subparsers.add_parser(
+        "queue", help="check user queue on sbatch"
+    )
+    # ~~~ runtime ~~~
+    check_runtimes = check_subparsers.add_parser(
+        "runtimes", help="describe runtime statistics for completed jobs"
+    )
+    check_runtimes = add_parser_options(check_runtimes, "wd", "spec", "ids")
+    # ~~ completed ~~~
+    check_completed = check_subparsers.add_parser(
+        "completion", help="survey which jobs have been completed so far"
+    )
+    check_completed = add_parser_options(check_completed, "wd", "spec", "ids-optional")
 
     # create the parser for the "validate-spec" command
     # -----------------------------------------------------------------------

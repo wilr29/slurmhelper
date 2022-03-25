@@ -18,7 +18,7 @@ from ..utils.io import (
     initialize_directories,
     is_valid_db,
 )
-from ..utils.reporting import list_slurm, check_runtime_avg
+from ..utils.reporting import list_slurm, check_runtimes, check_completed, check_queue
 
 
 class SlurmhelperCLI:
@@ -208,7 +208,7 @@ class SlurmhelperCLI:
             self.clean()
         elif self.args.do_copy:
             print(
-                "The --do-copyflag was used. Input copy scripts will be run for affected job ids "
+                "The --do-copy flag was used. Input copy scripts will be run for affected job ids "
                 "prior to sbatch submission script prep."
             )
             self.copy()
@@ -216,7 +216,12 @@ class SlurmhelperCLI:
         prep_job_array(self.config, self.job_list, self.paths, self.args)
 
     def check(self):
-        check_runtime_avg(self.job_list, self.paths, self.config)
+        if self.args.check_operation == "queue":
+            check_queue()
+        elif self.args.check_operation == "runtimes":
+            check_runtimes(self.job_list, self.paths, self.config)
+        # elif self.args.check_operation == 'completion':
+        #     check_completed()
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
