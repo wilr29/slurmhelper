@@ -323,7 +323,7 @@ class Job:
 
         return read_log_file_lines(self._jd["this_job_log_file"])
 
-    def print_job_log(self, head=6, tail=6):
+    def print_job_log(self, head=6, tail=6, full=False):
         """
         Pretty prints the job log header and footer. Sensitivity optional, shows more
         or less lines.
@@ -331,7 +331,7 @@ class Job:
         :return:
         """
         pretty_print_log(
-            self._jd["this_job_log_file"], head=head, tail=tail, header="job"
+            self._jd["this_job_log_file"], head=head, tail=tail, full=full, header="job"
         )
 
 

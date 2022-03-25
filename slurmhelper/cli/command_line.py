@@ -276,6 +276,22 @@ class SlurmhelperCLI:
                 failed_report=self.args.show_failed_logs,
             )
         elif self.args.check_operation == "log":
+            if self.args.job_id is not None:
+                id = self.args.job_id
+                type = "job"
+            else:
+                id = self.args.sbatch_id
+                type = "sbatch"
+            check_log(
+                id,
+                type,
+                self.paths,
+                self.config,
+                head=self.args.head,
+                tail=self.args.tail,
+                full=self.args.full,
+            )
+
             check_log()
         # check_runs(self.job_list, self.paths, self.args, self.config)
 

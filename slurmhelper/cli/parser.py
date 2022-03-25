@@ -489,6 +489,45 @@ def build_parser():
         help="print the job logs for failed jobs",
         action="store_true",
     )
+    check_log = check_subparsers.add_parser("log", help="print out a given log")
+    check_log = add_parser_options(check_log, "wd", "spec")
+    check_log_printing = check_log.add_mutually_exclusive_group()
+    check_log_printing.add_argument(
+        "--full", action="store_true", help="print the full log file,start to finish"
+    )
+    check_log_printing_range = check_log_printing.add_argument_group()
+    check_log_printing_range.add_argument(
+        "--head",
+        type=int,
+        default=6,
+        nargs=1,
+        help="number of lines to print from top of log",
+    )
+    check_log_printing_range.add_argument(
+        "--tail",
+        type=int,
+        default=6,
+        nargs=1,
+        help="number of lines to print from bottom of log",
+    )
+
+    check_log_id = check_log.add_mutually_exclusive_group(required=True)
+    check_log_id.add_argument(
+        "--sbatch_id",
+        "--sbatch-id",
+        help="specify to print an sbatch log (logs/slurm/sb-<sbatch_id>.txt)",
+        type=int,
+        nargs=1,
+        action="store",
+    )
+    check_log_id.add_argument(
+        "--job_id",
+        "--job-id",
+        help="specify to print a job unit log (logs/jobs/<job_id>.txt)",
+        type=int,
+        nargs=1,
+        action="store",
+    )
 
     # create the parser for the "validate-spec" command
     # -----------------------------------------------------------------------

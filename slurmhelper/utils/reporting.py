@@ -96,10 +96,13 @@ def read_log_file_lines(path_to_file):
             )
         )
 
+        # strip newlines for Now
+        lines = [s.strip() for s in lines]
+
     return lines
 
 
-def pretty_print_log(log_path, head=5, tail=5, header=None):
+def pretty_print_log(log_path, head, tail, full, header=None):
     """
     Pretty prints the job log header and footer. Sensitivity optional, shows more
     or less lines.
@@ -128,15 +131,19 @@ def pretty_print_log(log_path, head=5, tail=5, header=None):
         f"====================({str(len(lines)).zfill(6)} lines)===================="
     ]
 
-    # print first five and last five lines
-    print_lines = hdr + lines[0:head] + ["..."] * 3 + lines[-tail:] + foot
-    print_lines = [s.strip() for s in print_lines]
+    if full:
+        print_lines = hdr + lines + foot
+    else:
+        # print first five and last five lines
+        print_lines = hdr + lines[0:head] + ["..."] * 3 + lines[-tail:] + foot
+
     print_str = "\n".join(print_lines)
+
     print(print_str)
 
 
-def pretty_print_sbatch_log(path_to_file, head=6, tail=6):
-    pretty_print_log(path_to_file, head=head, tail=tail, header="sbatch")
+def pretty_print_sbatch_log(path_to_file, head, tail, full):
+    pretty_print_log(path_to_file, head=head, tail=tail, full=full, header="sbatch")
 
 
 def pretty_print_job_ids(ids_list, n_cols=5):
@@ -150,7 +157,7 @@ def find_sb_files(slurm_logs_path, id):
     ]
 
 
-def check_log(id, type, dirs, config, head=6, tail=6):
+def check_log(id, type, dirs, config, head=None, tail=None, full=False):
     """
     Print out a log in a friendly way.
     :param id:
@@ -160,16 +167,17 @@ def check_log(id, type, dirs, config, head=6, tail=6):
     :param sb_array_subset:
     :return:
     """
-    assert type in {"job", "sbatch"}, f"Invalid type: {type}"
-    assert (isinstance(id, str) and id.isnumeric()) or (
-        isinstance(id, (int, float, complex)) and not isinstance(id, bool)
-    ), "ID is invalid: should be string or number"
+    assert type in {"job", "sbatch", "sbatch_array_element"}, f"Invalid type: {type}"
+    if type != "sbatch_array_element":
+        assert (isinstance(id, str) and id.isnumeric()) or (
+            isinstance(id, (int, float, complex)) and not isinstance(id, bool)
+        ), "ID is invalid: should be string or number"
     # if sb_array_subset is not None and type != 'sbatch':
     #     raise(KeyError, "Should not provide sb_array_subset if not sbatch_id")
 
     if type == "job":
         job_obj_list = build_job_objects(dirs, config, [int(id)])
-        job_obj_list[0].print_job_log(head=head, tail=tail)
+        job_obj_list[0].print_job_log(head=head, tail=tail, full=full)
     elif type == "sbatch":
         # TODO: imolement a sbatch class??
         expected_sb_log_file = Path(dirs["slurm_logs"]).join(
@@ -182,7 +190,9 @@ def check_log(id, type, dirs, config, head=6, tail=6):
                 f"(expected: {os.path.join(dirs['slurm_logs'],f'sb-{str(id).zfill(4)}.txt')}",
             )
         else:
-            pretty_print_sbatch_log(expected_sb_log_file)
+            pretty_print_sbatch_log(
+                expected_sb_log_file, head=head, tail=tail, full=full
+            )
             # now check if there are extra logs and shit
             files = find_sb_files(dirs["slurm_logs"], int(id))
             if len(files) > 1:
