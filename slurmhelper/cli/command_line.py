@@ -277,10 +277,10 @@ class SlurmhelperCLI:
             )
         elif self.args.check_operation == "log":
             if self.args.job_id is not None:
-                id = self.args.job_id
+                id = self.args.job_id[0]
                 type = "job"
             else:
-                id = self.args.sbatch_id
+                id = self.args.sbatch_id[0]
                 type = "sbatch"
             check_log(
                 id,
