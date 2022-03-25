@@ -247,9 +247,15 @@ class SlurmhelperCLI:
         if self.args.check_operation == "queue":
             check_queue()
         elif self.args.check_operation == "runtime":
-            check_runtimes(self.paths, self.config, self.job_list)
+            if self.hasattr("job_list"):
+                check_runtimes(self.paths, self.config, self.job_list)
+            else:
+                check_runtimes(self.paths, self.config)
         elif self.args.check_operation == "completion":
-            check_completed(self.paths, self.config, self.job_list)
+            if self.hasattr("job_list"):
+                check_completed(self.paths, self.config, self.job_list)
+            else:
+                check_completed(self.paths, self.config)
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
