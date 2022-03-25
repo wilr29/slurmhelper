@@ -315,7 +315,7 @@ class TestableJob(Job):
     """
 
     def __init__(self, db, paths, order_id, config):
-        super(TestableJob, self).__init__(order_id)
+        super(TestableJob, self).__init__(order_id, paths, job_dict=None, config=config)
         self._db_index = db.index[db["order_id"] == self.id]
         self.record = db.iloc[self._db_index].to_dict(orient="records")[0]
         self._tests_ran = False
