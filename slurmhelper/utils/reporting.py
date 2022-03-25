@@ -99,7 +99,7 @@ def check_runtime_avg(job_list, dirs, config):
         rt = int(lines[runtime_line_position].strip(runtime_strip_str))
         runtimes.append(rt)
 
-    runtime_df = pd.DataFrame(pd.to_timedelta(l,unit=runtime_unit), columns=['runtime'])
+    runtime_df = pd.DataFrame(pd.to_timedelta(runtimes,unit=runtime_unit), columns=['runtime'])
     # print out descriptive stats! :)
     print(runtime_df.describe())
 
