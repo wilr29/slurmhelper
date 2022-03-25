@@ -18,7 +18,7 @@ from ..utils.io import (
     initialize_directories,
     is_valid_db,
 )
-from ..utils.reporting import list_slurm, check_runs
+from ..utils.reporting import list_slurm, check_runs, check_runtime_avg
 
 
 class SlurmhelperCLI:
@@ -204,7 +204,8 @@ class SlurmhelperCLI:
         prep_job_array(self.config, self.job_list, self.paths, self.args)
 
     def check(self):
-        check_runs(self.job_list, self.paths, self.args, self.config)
+        check_runtime_avg(self.job_list, self.paths, self.config)
+        # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
         # Not yet implemented.
