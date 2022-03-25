@@ -1,17 +1,19 @@
 """
-Functions leveraged to help create job objects from a given database, and leverage these
-objects' methods to write template scripts for IO or sbatch submission.
+Definition of Job object class, associated methods, and TestableJob class extension.
 """
 
+# This file contains the base job class, which is then augmented for each
+# specific use case with tests, etc.
+import copy
+import glob
+import json
+import logging
+import os
 from pathlib import Path
-from string import Formatter
-from time import sleep
+from string import Template, Formatter
 
 import pandas as pd
-import logging
-import progressbar
 
-from .job import Job
 from ..templates import compute_custom_vars
 
 logger = logging.getLogger("cli")
@@ -41,28 +43,15 @@ def compute_helpful_vars(job_dict, dirs):
     return job_dict
 
 
-def generate_run_scripts(dirs, config, args, job_list=None):
+def build_job_objects(dirs, config, job_list=None):
     """
-    Helps automagically generate running / cleanup bash scripts, based
-    on your given job specification.
+    Helps automagically generate a list of job objects, given your spec.
     :param job_list: list of job ids from your array (integers) for which
-    to generate scripts
+    to generate scripts. If none, all jobs in db will be included.
     :param dirs: output of ..utils.io:calculate_directories()
     :param config: dict generated from reading the .yml spec
-    :return: ordered list, with format::
-        [
-            {'id': 1,
-             'run_script': 'a long str...',
-             'params': {
-                    'order_id' : 1,
-                    'your_csv_var_here' : 1.234,
-                    'your_global_param_here' : 'potato'
-                }
-             }
-             ...
-        ]
+    :return: list of job objects! :)
     """
-
     # Read database file
     p_csvfile = Path(dirs["base"]).joinpath("db.csv")
     if p_csvfile.exists():
@@ -134,18 +123,4 @@ def generate_run_scripts(dirs, config, args, job_list=None):
         Job(d["order_id"], dirs, job_dict=d, config=config) for d in jobs_gc
     ]
 
-    # Construct scripts, and write to disk (if not dry run).
-    for i in progressbar.progressbar(range(len(job_obj_list)), redirect_stdout=True):
-        job = job_obj_list[i]
-        if args.verbose:
-            job.print_all_params()  # pretty print available inputs
-        logger.info("---------\n Attempting to compute scripts...\n")
-        outcome = job.compute_scripts(config, args.verbose or args.debug)
-        if not outcome:  # no scripts were added?
-            logger.critical(
-                "No scripts were written. Did you forget to add needed keys?"
-            )
-        elif outcome and not args.dry:
-            job.write_scripts_to_disk()
-
-        sleep(0.1)
+    return job_obj_list

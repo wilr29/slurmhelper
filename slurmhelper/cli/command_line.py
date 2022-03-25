@@ -1,7 +1,6 @@
+import logging
 import os
 import shutil
-import logging
-
 from argparse import ArgumentError
 from pprint import pprint
 
@@ -11,7 +10,7 @@ import pandas as pd
 from .parser import build_parser
 from .parser import valid_specs
 from ..config import load_builtin_spec, load_job_spec
-from ..jobs import prep_job, prep_job_array, generate_run_scripts
+from ..jobs.cli_helpers import prep_job, prep_job_array, generate_run_scripts
 from ..utils.io import (
     calculate_directories,
     calculate_directories_midwayscratch,

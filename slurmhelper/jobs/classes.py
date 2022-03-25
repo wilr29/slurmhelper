@@ -1,17 +1,10 @@
-"""
-Definition of Job object class, associated methods, and TestableJob class extension.
-"""
-
-# This file contains the base job class, which is then augmented for each
-# specific use case with tests, etc.
 import copy
 import glob
 import json
-import os
 import logging
-
+import os
 from pathlib import Path
-from string import Formatter, Template
+from string import Template, Formatter
 
 logger = logging.getLogger("cli")
 

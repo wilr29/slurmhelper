@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from ..jobs import TestableJob
+from ..jobs.classes import TestableJob
 
 
 def list_slurm(dirs):
@@ -96,7 +96,7 @@ def check_runs(job_list, dirs, args, config):
     sfmt_dir = config["output_path_subject"].format
     db["output_dir"] = db.apply(lambda x: sfmt_dir(**x), 1)
 
-    job_tests = [TestableJob(db, dirs, job) for job in job_list]
+    job_tests = [TestableJob(db, dirs, job, config) for job in job_list]
     rows = [job_test.get_results_dict() for job_test in job_tests]
     out_db = pd.DataFrame.from_records(rows)
     out_db.sort_values("order_id")

@@ -2,14 +2,14 @@
 Utility functions leveraged for I/O filesystem operations.
 """
 
+import logging
 import os
 import subprocess
-import logging
-import progressbar
-from time import sleep
 from pathlib import Path
+from time import sleep
 
 import pandas as pd
+import progressbar
 
 logger = logging.getLogger("cli")
 
@@ -138,7 +138,7 @@ def copy_or_clean(job_list, operation, path_scripts):
     assert (
         operation == "copy" or operation == "clean"
     ), "invalid operation specified: %s" % (operation)
-    print("========== BEGIN DOING STUFF ==========")
+    logger.info("========== BEGIN DOING STUFF ==========")
     for i in progressbar.progressbar(range(len(job_list)), redirect_stdout=True):
         job_id = job_list[i]
         logger.info(
