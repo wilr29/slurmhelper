@@ -39,8 +39,8 @@ class SlurmhelperCLI:
 
         # A manual check - need user id if using midway
         if (
-            args.hasattr("cluster")
-            and args.hasattr("userid")
+            "cluster" in args
+            and "userid" in args
             and args.cluster == "midway2-scratch"
             and args.userid is None
         ):
@@ -54,13 +54,13 @@ class SlurmhelperCLI:
         self.logger.info(args)
 
         # Load spec
-        if self.args.hasattr("spec_builtin") or self.args.hasattr("spec_file"):
+        if ("spec_builtin" in self.args) or ("spec_file" in self.args):
             self.__initialize_config()
         else:
             self.config = dict()
             self.logger.info("Did not load any job specification.")
 
-        if self.args.hasattr("cluster") or self.args.hasattr("wd_path"):
+        if ("cluster" in self.args) or ("wd_path" in self.args):
             self.__initialize_paths()
 
         # Compile job list, if required
@@ -74,7 +74,7 @@ class SlurmhelperCLI:
             )
             or (
                 args.operation == "check"
-                and args.hasattr("check_operation")
+                and "check_operation" in self.args
                 and args.check_operation in {"queue", "completion"}
             )
         ):
@@ -87,9 +87,9 @@ class SlurmhelperCLI:
     def __initialize_logging(self):
         log_format = "[%(levelname)s] - %(message)s"
         # set verbosity based on arguments!
-        if self.args.hasattr("verbose") and self.args.verbose:
+        if ("verbose" in self.args) and self.args.verbose:
             logging.basicConfig(level=20, format=log_format)  # info
-        elif self.args.hasattr("debug") and self.args.debug:
+        elif ("debug" in self.args) and self.args.debug:
             logging.basicConfig(level=10, format=log_format)  # debug
         else:
             logging.basicConfig(level=30, format=log_format)  # warning
