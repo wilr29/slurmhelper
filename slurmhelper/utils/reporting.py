@@ -69,6 +69,7 @@ def list_slurm(dirs):
 def check_runtime_avg(job_list, dirs, config):
     # assumptions about runtime: formatting, position
     # runtime_unit = seconds
+    runtime_unit = 'seconds'
     runtime_line_position = -3
     runtime_strip_str = "runtime: "
 
@@ -98,8 +99,9 @@ def check_runtime_avg(job_list, dirs, config):
         rt = int(lines[runtime_line_position].strip(runtime_strip_str))
         runtimes.append(rt)
 
+    runtime_df = pd.DataFrame(pd.to_timedelta(l,unit=runtime_unit), columns=['runtime'])
     # print out descriptive stats! :)
-    print(pd.DataFrame(runtimes, columns=["runtime"]).describe())
+    print(runtime_df.describe())
 
 
 def check_runs(job_list, dirs, args, config):
