@@ -74,7 +74,9 @@ class SlurmhelperCLI:
             )
             or (
                 args.operation == "check"
-                and "check_operation" in self.args
+                and ("ids" not in self.args and "range" not in self.args)
+                or args.range is None
+                and args.ids is None
                 # and args.check_operation in {"queue", "completion","runtime"}
             )
         ):
