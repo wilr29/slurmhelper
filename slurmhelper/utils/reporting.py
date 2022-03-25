@@ -101,7 +101,7 @@ def check_runtime_avg(job_list, dirs, config):
 
     runtime_df = pd.DataFrame(pd.to_timedelta(runtimes,unit=runtime_unit), columns=['runtime'])
     # print out descriptive stats! :)
-    print(runtime_df.describe())
+    print(runtime_df.describe(percentiles=[.25, .5, .75, .90, .95]))
 
 
 def check_runs(job_list, dirs, args, config):
