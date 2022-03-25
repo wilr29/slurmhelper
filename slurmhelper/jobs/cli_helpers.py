@@ -1,16 +1,14 @@
+import logging
 import os
 from string import Template
-
-import logging
 from time import sleep
 
 import progressbar
 
+from .utils import build_job_objects
 from ..utils.io import write_job_script
 from ..utils.misc import split_list
 from ..utils.time import calculate_wall_time, calculate_min_number_of_parcels
-
-from .utils import build_job_objects
 
 logger = logging.getLogger("cli")
 

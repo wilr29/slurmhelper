@@ -3,11 +3,10 @@ Functions used to aid in reporting information to the user about runs, jobs, etc
 """
 
 import glob
+import logging
 import os
 import re
 import time
-import logging
-import numpy as np
 from pathlib import Path
 
 import pandas as pd
@@ -16,6 +15,7 @@ from ..jobs.classes import TestableJob
 from ..jobs.utils import build_job_objects
 
 logger = logging.getLogger("cli")
+
 
 def list_slurm(dirs):
     """
@@ -65,11 +65,12 @@ def list_slurm(dirs):
 
     return
 
+
 def check_runtime_avg(job_list, dirs, config):
     # assumptions about runtime: formatting, position
     # runtime_unit = seconds
     runtime_line_position = -3
-    runtime_strip_str = 'runtime: '
+    runtime_strip_str = "runtime: "
 
     logging.info(f"Building job objects for {len(job_list)} jobs...")
 
@@ -78,19 +79,27 @@ def check_runtime_avg(job_list, dirs, config):
     with_logs = list(filter(lambda x: x.has_job_log, job_list))
 
     if len(with_logs) < len(job_list):
-        logger.warning(f"You indicated {len(job_list)} jobs to check, but"
-                       f"only {len(with_logs)} of those have valid log files.")
+        logger.warning(
+            f"You indicated {len(job_list)} jobs to check, but"
+            f"only {len(with_logs)} of those have valid log files."
+        )
 
-    with_success = list(filter(lambda x: x[-1] == '0', with_logs))
+    with_success = list(filter(lambda x: x[-1] == "0", with_logs))
 
     if len(with_logs) < len(job_list):
-        logger.warning(f"Of the {len(with_logs)} jobs with logs, only "
-                       f"{len(with_success)} appear to have completed successfully.")
+        logger.warning(
+            f"Of the {len(with_logs)} jobs with logs, only "
+            f"{len(with_success)} appear to have completed successfully."
+        )
 
-    runtimes = [int(lines[runtime_line_position].strip(runtime_strip_str)) for lines in with_success]
+    runtimes = [
+        int(lines[runtime_line_position].strip(runtime_strip_str))
+        for lines in with_success
+    ]
 
     # print out descriptive stats! :)
-    pd.DataFrame(runtimes, columns=['runtime']).describe()
+    pd.DataFrame(runtimes, columns=["runtime"]).describe()
+
 
 def check_runs(job_list, dirs, args, config):
     """
@@ -123,7 +132,9 @@ def check_runs(job_list, dirs, args, config):
     sfmt_glob = config["output_path_subject_expr"].format
     db["glob_output_expr"] = db.apply(lambda x: sfmt_glob(**x), 1)
 
-    sfmt_dir = os.path.join(config['output_path'],*config["output_path_subject"]).format
+    sfmt_dir = os.path.join(
+        config["output_path"], *config["output_path_subject"]
+    ).format
     db["output_dir"] = db.apply(lambda x: sfmt_dir(**x), 1)
 
     job_tests = [TestableJob(db, dirs, job, config) for job in job_list]

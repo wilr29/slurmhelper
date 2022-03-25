@@ -4,16 +4,13 @@ Definition of Job object class, associated methods, and TestableJob class extens
 
 # This file contains the base job class, which is then augmented for each
 # specific use case with tests, etc.
-import copy
-import glob
-import json
 import logging
-import os
 from pathlib import Path
-from string import Template, Formatter
+from string import Formatter
 
 import pandas as pd
 
+from .classes import Job
 from ..templates import compute_custom_vars
 
 logger = logging.getLogger("cli")

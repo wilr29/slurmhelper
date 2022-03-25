@@ -304,46 +304,53 @@ class Job:
 
     @property
     def has_job_log(self):
-        return os.path.exists(self._jd['this_job_log_file'])
+        return os.path.exists(self._jd["this_job_log_file"])
 
     def __read_job_log(self):
         if not self.has_job_log:
-            raise FileNotFoundError(f"No log file is available for job {self.id} in "
-                                    f"{self._jd['this_job_log_file']}!")
+            raise FileNotFoundError(
+                f"No log file is available for job {self.id} in "
+                f"{self._jd['this_job_log_file']}!"
+            )
         else:
-            with open(self._jd['this_job_log_file'], 'r') as job_log:
+            with open(self._jd["this_job_log_file"], "r") as job_log:
                 lines = [s.strip() for s in job_log.readlines()]
 
             # remove this for my sanity
-            lines = list(filter(lambda s: 'stty: standard input: Inappropriate ioctl '
-                                          'for device' not in s, lines))
+            lines = list(
+                filter(
+                    lambda s: "stty: standard input: Inappropriate ioctl "
+                    "for device" not in s,
+                    lines,
+                )
+            )
 
         return lines
 
     def print_job_log(self, line_trim=5):
-        '''
+        """
         Pretty prints the job log header and footer. Sensitivity optional, shows more
         or less lines.
         :param line_trim: how many lines to show from top and bottom
         :return:
-        '''
+        """
         lines = self.__read_job_log()
 
-        hdr = [f"=====================================================",
-               f"= Log file for job {str(self.id)}=============================",
-               f"====================================================="]
+        hdr = [
+            f"=====================================================",
+            f"= Log file for job {str(self.id)}=============================",
+            f"=====================================================",
+        ]
 
-        foot = [f"====================({str(len(lines)).zfill(6)} lines)===================="]
+        foot = [
+            f"====================({str(len(lines)).zfill(6)} lines)===================="
+        ]
 
         # print first five and last five lines
-        print_lines = hdr + lines[0:line_trim] + ['...']*3 + lines[-line_trim:] + foot
+        print_lines = hdr + lines[0:line_trim] + ["..."] * 3 + lines[-line_trim:] + foot
         print_lines = [s.strip() for s in print_lines]
-        print_str = '\n'.join(print_lines)
+        print_str = "\n".join(print_lines)
         print(print_str)
-
-
-
-
 
 
 class TestableJob(Job):

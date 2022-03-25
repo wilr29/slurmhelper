@@ -18,7 +18,7 @@ from ..utils.io import (
     initialize_directories,
     is_valid_db,
 )
-from ..utils.reporting import list_slurm, check_runs, check_runtime_avg
+from ..utils.reporting import list_slurm, check_runtime_avg
 
 
 class SlurmhelperCLI:
