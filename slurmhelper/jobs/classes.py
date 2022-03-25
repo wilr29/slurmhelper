@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from string import Template, Formatter
 
+from ..utils.reporting import read_log_file_lines, pretty_print_log
+
 logger = logging.getLogger("cli")
 
 
@@ -318,45 +320,19 @@ class Job:
                 f"No log file is available for job {self.id} in "
                 f"{self._jd['this_job_log_file']}!"
             )
-        else:
-            with open(self._jd["this_job_log_file"], "r") as job_log:
-                lines = [s.strip() for s in job_log.readlines()]
 
-            # remove this for my sanity
-            lines = list(
-                filter(
-                    lambda s: "stty: standard input: Inappropriate ioctl "
-                    "for device" not in s,
-                    lines,
-                )
-            )
+        return read_log_file_lines(self._jd["this_job_log_file"])
 
-        return lines
-
-    def print_job_log(self, line_trim=5):
+    def print_job_log(self, head=6, tail=6):
         """
         Pretty prints the job log header and footer. Sensitivity optional, shows more
         or less lines.
         :param line_trim: how many lines to show from top and bottom
         :return:
         """
-        lines = self.read_job_log_lines()
-
-        hdr = [
-            f"=====================================================",
-            f"= Log file for job {str(self.id)}=============================",
-            f"=====================================================",
-        ]
-
-        foot = [
-            f"====================({str(len(lines)).zfill(6)} lines)===================="
-        ]
-
-        # print first five and last five lines
-        print_lines = hdr + lines[0:line_trim] + ["..."] * 3 + lines[-line_trim:] + foot
-        print_lines = [s.strip() for s in print_lines]
-        print_str = "\n".join(print_lines)
-        print(print_str)
+        pretty_print_log(
+            self._jd["this_job_log_file"], head=head, tail=tail, header="job"
+        )
 
 
 class TestableJob(Job):

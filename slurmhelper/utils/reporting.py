@@ -80,9 +80,118 @@ def check_queue():
     pprint(df)
 
 
+def read_log_file_lines(path_to_file):
+    if not os.path.exists(str(path_to_file)):
+        raise (FileNotFoundError, f"Invalid log file specified: {str(path_to_file)}")
+    else:
+        with open(path_to_file, "r") as log:
+            lines = [s.strip() for s in log.readlines()]
+
+        # remove this for my sanity
+        lines = list(
+            filter(
+                lambda s: "stty: standard input: Inappropriate ioctl "
+                "for device" not in s,
+                lines,
+            )
+        )
+
+    return lines
+
+
+def pretty_print_log(log_path, head=5, tail=5, header=None):
+    """
+    Pretty prints the job log header and footer. Sensitivity optional, shows more
+    or less lines.
+    :param line_trim: how many lines to show from top and bottom
+    :return:
+    """
+    lines = read_log_file_lines(log_path)
+
+    if header is None:
+        hdr = ["=".ljust(60, "")]
+    else:
+        hdr = ["=".ljust(60, ""), "=".ljust(60, ""), "=".ljust(60, "")]
+        if header == "sbatch":
+            hdr[1] = "=".ljust(60, f"= sbatch log file: {os.path.basename(log_path)}")
+        elif header == "sbatch-element":
+            hdr[1] = "=".ljust(
+                60, f"= sbatch array element log file: {os.path.basename(log_path)}"
+            )
+        elif header == "job":
+            hdr[1] = "=".ljust(60, f"= Job unit log file: {os.path.basename(log_path)}")
+        else:
+            logger.warning("Did not specify valid header spec, so will use generic.")
+            hdr[1] = "=".ljust(60, f"= Log file: {os.path.basename(log_path)}")
+
+    foot = [
+        f"====================({str(len(lines)).zfill(6)} lines)===================="
+    ]
+
+    # print first five and last five lines
+    print_lines = hdr + lines[0:head] + ["..."] * 3 + lines[-tail:] + foot
+    print_lines = [s.strip() for s in print_lines]
+    print_str = "\n".join(print_lines)
+    print(print_str)
+
+
+def pretty_print_sbatch_log(path_to_file, head=6, tail=6):
+    pretty_print_log(path_to_file, head=head, tail=tail, header="sbatch")
+
+
 def pretty_print_job_ids(ids_list, n_cols=5):
     chunks = [ids_list[x : x + n_cols] for x in range(0, len(ids_list), n_cols)]
     print("\n".join(["\t".join([str(cell) for cell in row]) for row in chunks]))
+
+
+def find_sb_files(slurm_logs_path, id):
+    return [
+        str(p) for p in list(Path(slurm_logs_path).glob(f"sb-{str(id).zfill(4)}.*txt"))
+    ]
+
+
+def check_log(id, type, dirs, config, head=6, tail=6):
+    """
+    Print out a log in a friendly way.
+    :param id:
+    :param type:
+    :param dirs:
+    :param config:
+    :param sb_array_subset:
+    :return:
+    """
+    assert type in {"job", "sbatch"}, f"Invalid type: {type}"
+    assert (isinstance(id, str) and id.isnumeric()) or (
+        isinstance(id, (int, float, complex)) and not isinstance(id, bool)
+    ), "ID is invalid: should be string or number"
+    # if sb_array_subset is not None and type != 'sbatch':
+    #     raise(KeyError, "Should not provide sb_array_subset if not sbatch_id")
+
+    if type == "job":
+        job_obj_list = build_job_objects(dirs, config, [int(id)])
+        job_obj_list[0].print_job_log(head=head, tail=tail)
+    elif type == "sbatch":
+        # TODO: imolement a sbatch class??
+        expected_sb_log_file = Path(dirs["slurm_logs"]).join(
+            f"sb-{str(id).zfill(4)}.txt"
+        )
+        if not expected_sb_log_file.exists():
+            raise (
+                FileNotFoundError,
+                f"No slurm log was found for sbatch id {id} "
+                f"(expected: {os.path.join(dirs['slurm_logs'],f'sb-{str(id).zfill(4)}.txt')}",
+            )
+        else:
+            pretty_print_sbatch_log(expected_sb_log_file)
+            # now check if there are extra logs and shit
+            files = find_sb_files(dirs["slurm_logs"], int(id))
+            if len(files) > 1:
+                print(
+                    f"There are {len(files) - 1} additional sbatch wrapper subscripts available for "
+                    f"your array-ified sbatch job, but these will not be printed. If you would like "
+                    f"to see them, please look manually."
+                )
+                # TODO: implement something here?
 
 
 def check_completed(

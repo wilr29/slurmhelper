@@ -18,7 +18,13 @@ from ..utils.io import (
     initialize_directories,
     is_valid_db,
 )
-from ..utils.reporting import list_slurm, check_runtimes, check_completed, check_queue
+from ..utils.reporting import (
+    list_slurm,
+    check_runtimes,
+    check_completed,
+    check_queue,
+    check_log,
+)
 
 
 class SlurmhelperCLI:
@@ -47,8 +53,12 @@ class SlurmhelperCLI:
             raise ArgumentError(
                 "If you are using midway2-scratch, you must provide your user ID!"
             )
-
-        print(f"\nSlurmhelper will run the {args.operation} operation.")
+        if args.operation == "check":
+            print(
+                f"\nSlurmhelper will run the {args.operation} {args.check_operation} operation."
+            )
+        else:
+            print(f"\nSlurmhelper will run the {args.operation} operation.")
 
         self.logger.info("Arguments specified:")
         self.logger.info(args)
@@ -265,6 +275,8 @@ class SlurmhelperCLI:
                 return_completed_list=False,
                 failed_report=self.args.show_failed_logs,
             )
+        elif self.args.check_operation == "log":
+            check_log()
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
