@@ -262,12 +262,15 @@ def check_completed(
             pretty_print_job_ids(failed_job_ids)
 
             if failed_report:
-                print("~~~~~~ job logs ~~~~~~~")
+                print("".rjust("*",70))
+                print(" job logs ".ljust("*",30).rjust("*",30))
+                print("".rjust("*", 70).join("\n"))
                 failed_jobs = list(
                     filter(lambda x: str(x) in failed_job_ids, with_logs)
                 )
                 for job in failed_jobs:
                     job.print_job_log()
+                    print(" ")
             else:
                 print(
                     "\nTip: rerun with --show-failed-logs flag to print out job logs available for failed jobs\n"
