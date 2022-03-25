@@ -71,7 +71,9 @@ def list_slurm(dirs):
 
 def check_queue():
     # assumes slurm
-    out = subprocess.check_output(["squeue", "-u", "$USER"], encoding="UTF-8")
+    out = subprocess.check_output(
+        ["squeue", "-u", os.environ["USER"]], encoding="UTF-8"
+    )
     df = pd.read_fwf(StringIO(out))
     # TODO: merge this with info on sbatch thingys, then do some magic to make it more informative!
     pprint(df)
