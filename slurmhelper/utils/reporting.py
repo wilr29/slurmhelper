@@ -19,6 +19,21 @@ from ..jobs.utils import build_job_objects
 
 logger = logging.getLogger("cli")
 
+def pretty_cli_header(str,pad_char, n_cols=60,start_newline=True,end_newline=True):
+    start=''
+    end=''
+
+    if start_newline:
+        start="\n"
+
+    if end_newline:
+        end='\n'
+
+    rv = [start.ljust(n_cols, pad_char),
+          f"{pad_char} {str} ".ljust(n_cols, pad_char),
+          "".ljust(n_cols, pad_char).join(end)]
+
+    return '\n'.join(rv)
 
 def list_slurm(dirs):
     """
@@ -262,9 +277,8 @@ def check_completed(
             pretty_print_job_ids(failed_job_ids)
 
             if failed_report:
-                print("".rjust("*",70))
-                print(" job logs ".ljust("*",30).rjust("*",30))
-                print("".rjust("*", 70).join("\n"))
+                print(pretty_cli_header("job logs", "*", n_cols=60, start_newline=True, end_newline=True))
+
                 failed_jobs = list(
                     filter(lambda x: str(x) in failed_job_ids, with_logs)
                 )
