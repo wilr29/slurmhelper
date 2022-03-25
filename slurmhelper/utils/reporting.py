@@ -111,20 +111,22 @@ def pretty_print_log(log_path, head, tail, full, header=None):
     lines = read_log_file_lines(log_path)
 
     if header is None:
-        hdr = ["=".ljust(60, "")]
+        hdr = ["".ljust(60, "=")]
     else:
-        hdr = ["=".ljust(60, ""), "=".ljust(60, ""), "=".ljust(60, "")]
+        hdr = ["".ljust(60, "="), "".ljust(60, "="), "".ljust(60, "=")]
         if header == "sbatch":
-            hdr[1] = "=".ljust(60, f"= sbatch log file: {os.path.basename(log_path)}")
+            hdr[1] = f"= sbatch log file: {os.path.basename(log_path)}".ljust(60, "=")
         elif header == "sbatch-element":
-            hdr[1] = "=".ljust(
-                60, f"= sbatch array element log file: {os.path.basename(log_path)}"
+            hdr[
+                1
+            ] = f"= sbatch array element log file: {os.path.basename(log_path)}".ljust(
+                60, "="
             )
         elif header == "job":
-            hdr[1] = "=".ljust(60, f"= Job unit log file: {os.path.basename(log_path)}")
+            hdr[1] = f"= Job unit log file: {os.path.basename(log_path)}".ljust(60, "=")
         else:
             logger.warning("Did not specify valid header spec, so will use generic.")
-            hdr[1] = "=".ljust(60, f"= Log file: {os.path.basename(log_path)}")
+            hdr[1] = f"= Log file: {os.path.basename(log_path)}".ljust(60, "=")
 
     foot = [
         f"====================({str(len(lines)).zfill(6)} lines)===================="
