@@ -306,6 +306,12 @@ class Job:
     def has_job_log(self):
         return os.path.exists(self._jd["this_job_log_file"])
 
+    @property
+    def ran_successfully(self):
+        # assumption: exit code is last line!
+        lines = self.read_job_log_lines()
+        return lines[-1] == '0'
+
     def read_job_log_lines(self):
         if not self.has_job_log:
             raise FileNotFoundError(

@@ -84,7 +84,7 @@ def check_runtime_avg(job_list, dirs, config):
             f"only {len(with_logs)} of those have valid log files."
         )
 
-    with_success = list(filter(lambda x: x.read_job_log_lines()[-1] == "0", with_logs))
+    with_success = list(filter(lambda x: x.ran_successfully, with_logs))
 
     if len(with_logs) < len(job_list):
         logger.warning(
@@ -92,10 +92,11 @@ def check_runtime_avg(job_list, dirs, config):
             f"{len(with_success)} appear to have completed successfully."
         )
 
-    runtimes = [
-        int(lines[runtime_line_position].strip(runtime_strip_str))
-        for lines in with_success
-    ]
+    runtimes = []
+    for job in with_success:
+        lines = job.read_job_log_lines()
+        rt = int(lines[runtime_line_position].strip(runtime_strip_str))
+        runtimes.append(rt)
 
     # print out descriptive stats! :)
     pd.DataFrame(runtimes, columns=["runtime"]).describe()
