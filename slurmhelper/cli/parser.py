@@ -475,7 +475,7 @@ def build_parser():
     )
     # ~~~ runtime ~~~
     check_runtimes = check_subparsers.add_parser(
-        "runtimes", help="describe runtime statistics for completed jobs"
+        "runtime", help="describe runtime statistics for completed jobs"
     )
     check_runtimes = add_parser_options(check_runtimes, "wd", "spec", "ids")
     # ~~ completed ~~~

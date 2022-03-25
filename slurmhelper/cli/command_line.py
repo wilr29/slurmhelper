@@ -246,10 +246,10 @@ class SlurmhelperCLI:
     def check(self):
         if self.args.check_operation == "queue":
             check_queue()
-        elif self.args.check_operation == "runtimes":
+        elif self.args.check_operation == "runtime":
             check_runtimes(self.job_list, self.paths, self.config)
-        # elif self.args.check_operation == 'completion':
-        #     check_completed()
+        elif self.args.check_operation == "completion":
+            check_completed()
         # check_runs(self.job_list, self.paths, self.args, self.config)
 
     def validate_spec(self):
