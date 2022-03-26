@@ -80,7 +80,6 @@ def build_job_objects(dirs, config, job_list=None):
     # Parse fields provided in YAML and CSV files
     fields_df = df.columns.values.tolist()
     fields_global = list(config["script_global_settings"].keys())
-    # fields_provided = fields_df + fields_global
 
     # create one dict per subject with info from csv rows, via pandas
     jobs = df.to_dict(orient="records")
