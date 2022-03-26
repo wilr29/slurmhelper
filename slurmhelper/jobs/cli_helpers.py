@@ -213,8 +213,6 @@ def prep_job_array(config, job_list, paths, args):
         print("Please run the following command to submit your sbatch job array:")
         print(f"\n  sbatch {tgt_path}\n")
 
-    return
-
 
 def generate_run_scripts(dirs, config, args, job_list=None):
     """

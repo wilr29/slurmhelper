@@ -403,7 +403,6 @@ class TestableJob(Job):
             self._tests_results[test]["result"] for test in self._tests_results.keys()
         ]
         self.is_valid = all(results)
-        return
 
     def get_results_list(self):
         return [self.id, self._tests_results]
@@ -427,7 +426,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_outputs"] = rv
-        return
 
     def test_check_inputs(self):
         rv = {"result": False, "logs": []}
@@ -441,7 +439,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_inputs"] = rv
-        return
 
     def test_check_work(self):
         rv = {"result": False, "logs": []}
@@ -455,7 +452,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_work"] = rv
-        return
 
     def test_check_logs(self):
         rv = {"result": False, "logs": []}
@@ -485,7 +481,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_log"] = rv
-        return
 
     def get_results_dict(self):
         if not self._tests_ran:
