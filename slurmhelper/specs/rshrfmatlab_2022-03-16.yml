@@ -71,11 +71,11 @@ run_script: |
         --keep_deconv roi \
         --atlas-parametermaps aal3v1 craddock400 shen268 \
         --atlas-deconv aal3v1 craddock400 shen268 \
-        --keep_non_olrm \
+        --keep_non_olrm --keep_mat_file \
         ${path_matlab} \
         ${path_spm} \
         ${this_job_inputs_dir}/derivatives \
-        ${output_base_dir}/restingstatehrf \
+        ${output_base_dir} \
         ${this_job_work_dir}
 
     exit_status=$?
@@ -175,9 +175,9 @@ copy_script: |
 # database: 'rshrf_db.csv'
 
 # Base directory where outputs are stored
-output_path: "/project2/abcd/derivatives/restingstatehrf"
+output_path: "/project2/abcd/derivatives"
 # Subject-specific sub-directory (e.g., for BIDS)
-output_path_subject: ['sub-{subject}', 'ses-{session}', 'func']
+output_path_subject: ['restingstatehrf','sub-{subject}', 'ses-{session}', 'func']
 # Subject-specific file glob (e.g., for checking outputs)
 output_path_subject_expr: 'sub-{subject}_ses-{session}_task-{task}_run-{run:d}_*'
 
