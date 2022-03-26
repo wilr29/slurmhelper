@@ -231,7 +231,7 @@ class Job:
             writer.write(self._scripts[operation])
 
     def write_scripts_to_disk(self):
-        to_write = [k for k in self._scripts.keys() if self._scripts[k] is not None]
+        to_write = [k for k in self._scripts if self._scripts[k] is not None]
         for op in to_write:
             self._write(op)
 
@@ -400,7 +400,7 @@ class TestableJob(Job):
 
     def _update_valid(self):
         results = [
-            self._tests_results[test]["result"] for test in self._tests_results.keys()
+            self._tests_results[test]["result"] for test in self._tests_results
         ]
         self.is_valid = all(results)
 
