@@ -249,7 +249,7 @@ def generate_run_scripts(dirs, config, args, job_list=None):
             logger.critical(
                 "No scripts were written. Did you forget to add needed keys?"
             )
-        elif outcome and not args.dry:
+        elif outcome and 'dry' in args and not args.dry:
             job.write_scripts_to_disk()
 
         sleep(0.1)
