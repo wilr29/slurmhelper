@@ -175,11 +175,12 @@ class SlurmhelperCLI:
         self.logger.info(self.job_list)
 
         # Leverage DB to ensure job ids provided do not exceed range, or are invalid in some other way!
-        assert set(self.job_list).issubset(self.__valid_ids), (
-            f"Some job ids provided are not in the scope of "
-            f"the csv database we are using. These are: "
-            f"{set(self.job_list) - self.__valid_ids}"
-        )
+        if not set(self.job_list).issubset(self.__valid_ids):
+            raise AssertionError(
+                f"Some job ids provided are not in the scope of "
+                f"the csv database we are using. These are: "
+                f"{set(self.job_list) - self.__valid_ids}"
+            )
 
     def init(self):
         initialize_directories(self.paths)

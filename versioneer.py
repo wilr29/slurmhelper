@@ -383,7 +383,8 @@ def register_vcs_handler(vcs, method):  # decorator
 def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
                 env=None):
     """Call the given command(s)."""
-    assert isinstance(commands, list)
+    if not isinstance(commands, list):
+        raise AssertionError
     process = None
 
     popen_kwargs = {}
@@ -1683,13 +1684,16 @@ def get_versions(verbose=False):
     root = get_root()
     cfg = get_config_from_root(root)
 
-    assert cfg.VCS is not None, "please set [versioneer]VCS= in setup.cfg"
+    if cfg.VCS is None:
+        raise AssertionError("please set [versioneer]VCS= in setup.cfg")
     handlers = HANDLERS.get(cfg.VCS)
-    assert handlers, "unrecognized VCS '%s'" % cfg.VCS
+    if not handlers:
+        raise AssertionError("unrecognized VCS '%s'" % cfg.VCS)
     verbose = verbose or cfg.verbose
-    assert cfg.versionfile_source is not None, \
-        "please set versioneer.versionfile_source"
-    assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
+    if cfg.versionfile_source is None:
+        raise AssertionError("please set versioneer.versionfile_source")
+    if cfg.tag_prefix is None:
+        raise AssertionError("please set versioneer.tag_prefix")
 
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
 

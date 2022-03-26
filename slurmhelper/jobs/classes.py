@@ -73,7 +73,8 @@ class Job:
 
     @is_scripted.setter
     def is_scripted(self, value):
-        assert isinstance(self._jd, dict), "Invalid data structure"
+        if not isinstance(self._jd, dict):
+            raise AssertionError("Invalid data structure")
         self._is_scripted = value
 
     @property
@@ -99,17 +100,20 @@ class Job:
 
     @script_run.setter
     def script_run(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["run"] = value
 
     @script_copy.setter
     def script_copy(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["copy"] = value
 
     @script_clean.setter
     def script_clean(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["clean"] = value
 
     def print_all_params(self):
@@ -154,17 +158,18 @@ class Job:
         # Generate a dictionary with required parameters only
         fmt_dict = self._clean_params(fields, verbose)
         # Sanity check
-        assert set(fmt_dict.keys()) == set(fields), (
-            "You're missing information!\n"
-            "%d fields supplied: %s\n"
-            "%d fields required: %s\n"
-            % (
-                len(fmt_dict),
-                " ".join(fmt_dict.keys()),
-                len(set(fields)),
-                " ".join(list(set(fields))),
+        if set(fmt_dict.keys()) != set(fields):
+            raise AssertionError(
+                "You're missing information!\n"
+                "%d fields supplied: %s\n"
+                "%d fields required: %s\n"
+                % (
+                    len(fmt_dict),
+                    " ".join(fmt_dict.keys()),
+                    len(set(fields)),
+                    " ".join(list(set(fields))),
+                )
             )
-        )
 
         # Fill in my template!
         logging.debug("Attempting to format script template using safe substitution...")
@@ -190,7 +195,8 @@ class Job:
         :return:
         """
 
-        assert isinstance(config, dict), "Config should be a dict object!"
+        if not isinstance(config, dict):
+            raise AssertionError("Config should be a dict object!")
 
         cnt = 0
         if "run_script" in config.keys():
@@ -212,7 +218,8 @@ class Job:
 
     def _write(self, operation):
         p = Path(self._basedirs["job_scripts"])  # target path
-        assert p.exists(), "target folder does not exist! ensure you initialize dir !"
+        if not p.exists():
+            raise AssertionError("target folder does not exist! ensure you initialize dir !")
         with open(p.joinpath(self._script_names[operation]), "w") as writer:
             logger.info(
                 "Writing job {id} {op} script to {path}".format(
