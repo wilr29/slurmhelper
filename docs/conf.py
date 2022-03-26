@@ -48,14 +48,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- General configuration ------------------------------------------------
 autoclass_content = "both"  # include both class docstring and __init__
-# autodoc_default_options = {
-#         # Make sure that any autodoc declarations show the right members
-#         "members": True,
-#         "inherited-members": True,
-#         "private-members": True,
-#         "show-inheritance": True,
-#         "imported-members" : True
-# }
 autosectionlabel_prefix_document = True # have refs point to specific page.
 autosummary_generate = True  # Make _autosummary files and include them
 napoleon_numpy_docstring = False  # Force consistency, leave only Google

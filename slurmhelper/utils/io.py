@@ -78,7 +78,6 @@ def initialize_directories(dirs):
     for key in dirs.keys():
         p = Path(dirs[key])
         p.mkdir(parents=True, exist_ok=True)
-    return
 
 
 def write_job_script(job_id, sbatch_id, dirs, script):
@@ -116,8 +115,6 @@ def write_job_script(job_id, sbatch_id, dirs, script):
             f.write(script)
             logger.info(f"Wrote file: {path_sbatch}")
 
-    return
-
 
 def copy_or_clean(job_list, operation, path_scripts):
     """
@@ -135,9 +132,10 @@ def copy_or_clean(job_list, operation, path_scripts):
     :param path_scripts: where do we expect to find the scripts generated from R (abs path)
     :return: nothin', just some good ol' stuff done via bash
     """
-    assert (
+    if not (
         operation == "copy" or operation == "clean"
-    ), "invalid operation specified: %s" % (operation)
+    ):
+        raise AssertionError("invalid operation specified: %s" % (operation))
     logger.info("========== BEGIN DOING STUFF ==========")
     for i in progressbar.progressbar(range(len(job_list)), redirect_stdout=True):
         job_id = job_list[i]
@@ -159,5 +157,3 @@ def copy_or_clean(job_list, operation, path_scripts):
         )
         sleep(0.1)
     logger.info("========== TOTALLY DONE! YEE HAW :) ==========")
-
-    return

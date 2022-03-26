@@ -11,7 +11,6 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from pprint import pprint
-import cmd
 
 import pandas as pd
 
@@ -361,7 +360,7 @@ def check_runs(job_list, dirs, args, config):
     out_db.sort_values("order_id")
 
     valid = out_db.loc[out_db["valid"], "order_id"].values.tolist()
-    not_valid = out_db.loc[out_db["valid"] == False, "order_id"].values.tolist()
+    not_valid = out_db.loc[out_db["valid"] is False, "order_id"].values.tolist()
 
     if len(valid) > 0:
         print("{num} valid jobs found.".format(num=len(valid)))

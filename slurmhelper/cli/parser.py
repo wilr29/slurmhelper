@@ -26,26 +26,6 @@ def valid_time(x):
     return x
 
 
-# def wall_time_type(x):
-#     """
-#     Definition of a wall time type for validating in argparse.
-#     :param x: list assumed to be of length 3 in order hours, minutes, seconds.
-#     :return:
-#     """
-#     # Assertions
-#     assert isinstance(x, list)
-#     assert len(x) == 3
-#     # Validation
-#     hours = x[0]
-#     minutes = x[1]
-#     seconds = x[2]
-#     if seconds > 59 or seconds < 0:
-#         raise argparse.ArgumentTypeError("Seconds value needs to be 0 <= secs < 60")
-#     elif minutes > 59 or minutes < 0:
-#         raise argparse.ArgumentTypeError("Minutes value needs to be 0 <= minutes < 60")
-#     elif hours > 23 or hours < 0:
-#         raise argparse.ArgumentTypeError("Hours value needs to be 0 <= hours < 24")
-#     return x
 
 
 def built_in_spec_type(x):
@@ -55,14 +35,16 @@ def built_in_spec_type(x):
     :return:
     """
     # Assertions
-    assert isinstance(x, str), "a string should be provided..."
+    if not isinstance(x, str):
+        raise AssertionError("a string should be provided...")
     # Validation
     l = x.split(":")
-    assert len(l) == 1 or len(l) == 2, (
-        f"Something weird is happening when parsing your built-in spec argument. "
-        f"Make sure you do not have more than one colon "
-        f"present. You provided: {x}"
-    )
+    if not (len(l) == 1 or len(l) == 2):
+        raise AssertionError(
+            f"Something weird is happening when parsing your built-in spec argument. "
+            f"Make sure you do not have more than one colon "
+            f"present. You provided: {x}"
+        )
     spec_name = l[0]
     if spec_name not in valid_specs.keys():
         raise argparse.ArgumentTypeError(
@@ -338,8 +320,8 @@ def add_parser_options(parser, *args):
     allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc"}
     opts = set(args)
 
-    assert opts.issubset(allowed), "some of the args indicated are not yet implemented"
-    # parser = copy.deepcopy(parser)
+    if not opts.issubset(allowed):
+        raise AssertionError("some of the args indicated are not yet implemented")
 
     if "wd" in opts:
         parser = add_work_dir_path_args(parser)

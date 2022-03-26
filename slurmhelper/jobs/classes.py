@@ -73,7 +73,8 @@ class Job:
 
     @is_scripted.setter
     def is_scripted(self, value):
-        assert isinstance(self._jd, dict), "Invalid data structure"
+        if not isinstance(self._jd, dict):
+            raise AssertionError("Invalid data structure")
         self._is_scripted = value
 
     @property
@@ -99,17 +100,20 @@ class Job:
 
     @script_run.setter
     def script_run(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["run"] = value
 
     @script_copy.setter
     def script_copy(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["copy"] = value
 
     @script_clean.setter
     def script_clean(self, value):
-        assert isinstance(value, str), "Can only set as str"
+        if not isinstance(value, str):
+            raise AssertionError("Can only set as str")
         self._scripts["clean"] = value
 
     def print_all_params(self):
@@ -131,8 +135,7 @@ class Job:
         )
         if len(fields_rm) > 0:
             logger.debug(
-                "These are: %s" % (" ".join(["'{s}'".format(s=s) for s in fields_rm]))
-            )
+                "These are: %s", (" ".join(["'{s}'".format(s=s) for s in fields_rm])))
 
         dd = copy.deepcopy(self._jd)
 
@@ -143,38 +146,37 @@ class Job:
         return dd
 
     def _compute_specific_script(self, operation, script_template, verbose):
-        logger.info("Job %s: computing script %s" % (self.id, operation))
+        logger.info("Job %s: computing script %s", self.id, operation)
 
         # compute fields required by the template provided
         fields = list(
             set([i[1] for i in Formatter().parse(script_template) if i[1] is not None])
         )
         logger.debug(
-            "Template for %s requires %d unique parameters:  %s"
-            % (operation, len(set(fields)), " ".join(list(set(fields))))
-        )
+            "Template for %s requires %d unique parameters:  %s", operation, len(set(fields)), " ".join(list(set(fields))))
 
         # Generate a dictionary with required parameters only
         fmt_dict = self._clean_params(fields, verbose)
         # Sanity check
-        assert set(fmt_dict.keys()) == set(fields), (
-            "You're missing information!\n"
-            "%d fields supplied: %s\n"
-            "%d fields required: %s\n"
-            % (
-                len(fmt_dict),
-                " ".join(fmt_dict.keys()),
-                len(set(fields)),
-                " ".join(list(set(fields))),
+        if set(fmt_dict.keys()) != set(fields):
+            raise AssertionError(
+                "You're missing information!\n"
+                "%d fields supplied: %s\n"
+                "%d fields required: %s\n"
+                % (
+                    len(fmt_dict),
+                    " ".join(fmt_dict.keys()),
+                    len(set(fields)),
+                    " ".join(list(set(fields))),
+                )
             )
-        )
 
         # Fill in my template!
         logging.debug("Attempting to format script template using safe substitution...")
         rs = Template(script_template).safe_substitute(fmt_dict)
 
-        logging.info("Job %d: Successfully computed %s script!" % (self.id, operation))
-        logging.debug("Resulting script:\n %s" % (rs))
+        logging.info("Job %d: Successfully computed %s script!", self.id, operation)
+        logging.debug("Resulting script:\n %s", (rs))
 
         if operation == "run":
             self.script_run = rs
@@ -193,7 +195,8 @@ class Job:
         :return:
         """
 
-        assert isinstance(config, dict), "Config should be a dict object!"
+        if not isinstance(config, dict):
+            raise AssertionError("Config should be a dict object!")
 
         cnt = 0
         if "run_script" in config.keys():
@@ -215,7 +218,8 @@ class Job:
 
     def _write(self, operation):
         p = Path(self._basedirs["job_scripts"])  # target path
-        assert p.exists(), "target folder does not exist! ensure you initialize dir !"
+        if not p.exists():
+            raise AssertionError("target folder does not exist! ensure you initialize dir !")
         with open(p.joinpath(self._script_names[operation]), "w") as writer:
             logger.info(
                 "Writing job {id} {op} script to {path}".format(
@@ -227,7 +231,7 @@ class Job:
             writer.write(self._scripts[operation])
 
     def write_scripts_to_disk(self):
-        to_write = [k for k in self._scripts.keys() if self._scripts[k] is not None]
+        to_write = [k for k in self._scripts if self._scripts[k] is not None]
         for op in to_write:
             self._write(op)
 
@@ -396,10 +400,9 @@ class TestableJob(Job):
 
     def _update_valid(self):
         results = [
-            self._tests_results[test]["result"] for test in self._tests_results.keys()
+            self._tests_results[test]["result"] for test in self._tests_results
         ]
         self.is_valid = all(results)
-        return
 
     def get_results_list(self):
         return [self.id, self._tests_results]
@@ -423,7 +426,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_outputs"] = rv
-        return
 
     def test_check_inputs(self):
         rv = {"result": False, "logs": []}
@@ -437,7 +439,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_inputs"] = rv
-        return
 
     def test_check_work(self):
         rv = {"result": False, "logs": []}
@@ -451,7 +452,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_work"] = rv
-        return
 
     def test_check_logs(self):
         rv = {"result": False, "logs": []}
@@ -481,7 +481,6 @@ class TestableJob(Job):
 
         # Append results to results dict
         self._tests_results["check_log"] = rv
-        return
 
     def get_results_dict(self):
         if not self._tests_ran:
