@@ -11,7 +11,6 @@ import subprocess
 from pathlib import Path
 from io import StringIO
 from pprint import pprint
-import cmd
 
 import pandas as pd
 
