@@ -135,9 +135,10 @@ def copy_or_clean(job_list, operation, path_scripts):
     :param path_scripts: where do we expect to find the scripts generated from R (abs path)
     :return: nothin', just some good ol' stuff done via bash
     """
-    assert (
+    if not (
         operation == "copy" or operation == "clean"
-    ), "invalid operation specified: %s" % (operation)
+    ):
+        raise AssertionError("invalid operation specified: %s" % (operation))
     logger.info("========== BEGIN DOING STUFF ==========")
     for i in progressbar.progressbar(range(len(job_list)), redirect_stdout=True):
         job_id = job_list[i]

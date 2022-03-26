@@ -55,14 +55,16 @@ def built_in_spec_type(x):
     :return:
     """
     # Assertions
-    assert isinstance(x, str), "a string should be provided..."
+    if not isinstance(x, str):
+        raise AssertionError("a string should be provided...")
     # Validation
     l = x.split(":")
-    assert len(l) == 1 or len(l) == 2, (
-        f"Something weird is happening when parsing your built-in spec argument. "
-        f"Make sure you do not have more than one colon "
-        f"present. You provided: {x}"
-    )
+    if not (len(l) == 1 or len(l) == 2):
+        raise AssertionError(
+            f"Something weird is happening when parsing your built-in spec argument. "
+            f"Make sure you do not have more than one colon "
+            f"present. You provided: {x}"
+        )
     spec_name = l[0]
     if spec_name not in valid_specs.keys():
         raise argparse.ArgumentTypeError(
@@ -338,7 +340,8 @@ def add_parser_options(parser, *args):
     allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc"}
     opts = set(args)
 
-    assert opts.issubset(allowed), "some of the args indicated are not yet implemented"
+    if not opts.issubset(allowed):
+        raise AssertionError("some of the args indicated are not yet implemented")
     # parser = copy.deepcopy(parser)
 
     if "wd" in opts:

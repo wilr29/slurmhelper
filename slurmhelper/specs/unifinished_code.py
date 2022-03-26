@@ -49,7 +49,8 @@ class JobSpec:
         :param spec_file: path to YAML file to read
         :return: dictionary with specification
         """
-        assert os.path.exists(spec_file), f"{spec_file} does not exist!"
+        if not os.path.exists(spec_file):
+            raise AssertionError(f"{spec_file} does not exist!")
 
         try:
             with open(spec_file, "r") as file:
@@ -68,11 +69,12 @@ class JobSpec:
         spec = self._spec_dict
         # ensure all mandatory keys are present
         # works b/c set math: {a, b, c} - {a, b, c, x, y, z} should == {}
-        assert len(spec_required_keys - spec.keys()) == 0, (
-            f"Some required keys are not "
-            f"defined in your spec. these are: "
-            f"{' '.join(list(spec_required_keys - spec.keys()))}"
-        )
+        if len(spec_required_keys - spec.keys()) != 0:
+            raise AssertionError(
+                f"Some required keys are not "
+                f"defined in your spec. these are: "
+                f"{' '.join(list(spec_required_keys - spec.keys()))}"
+            )
         # warn user if optional keys that are not defined were include
         # if (len(spec_required_keys.union(spec_optional_keys) - spec.keys()) > 0):
         #    logging.warn('Variables ;...')
