@@ -131,8 +131,7 @@ class Job:
         )
         if len(fields_rm) > 0:
             logger.debug(
-                "These are: %s" % (" ".join(["'{s}'".format(s=s) for s in fields_rm]))
-            )
+                "These are: %s", (" ".join(["'{s}'".format(s=s) for s in fields_rm])))
 
         dd = copy.deepcopy(self._jd)
 
@@ -143,16 +142,14 @@ class Job:
         return dd
 
     def _compute_specific_script(self, operation, script_template, verbose):
-        logger.info("Job %s: computing script %s" % (self.id, operation))
+        logger.info("Job %s: computing script %s", self.id, operation)
 
         # compute fields required by the template provided
         fields = list(
             set([i[1] for i in Formatter().parse(script_template) if i[1] is not None])
         )
         logger.debug(
-            "Template for %s requires %d unique parameters:  %s"
-            % (operation, len(set(fields)), " ".join(list(set(fields))))
-        )
+            "Template for %s requires %d unique parameters:  %s", operation, len(set(fields)), " ".join(list(set(fields))))
 
         # Generate a dictionary with required parameters only
         fmt_dict = self._clean_params(fields, verbose)
@@ -173,8 +170,8 @@ class Job:
         logging.debug("Attempting to format script template using safe substitution...")
         rs = Template(script_template).safe_substitute(fmt_dict)
 
-        logging.info("Job %d: Successfully computed %s script!" % (self.id, operation))
-        logging.debug("Resulting script:\n %s" % (rs))
+        logging.info("Job %d: Successfully computed %s script!", self.id, operation)
+        logging.debug("Resulting script:\n %s", (rs))
 
         if operation == "run":
             self.script_run = rs
