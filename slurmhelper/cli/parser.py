@@ -202,8 +202,7 @@ def add_work_dir_path_args(parser):
         "(less efficient...), or for testing",
     )
 
-    cluster = base_folder.add_argument_group()
-    cluster.add_argument(
+    base_folder.add_argument(
         "--cluster",
         type=str,
         nargs=1,
@@ -212,7 +211,8 @@ def add_work_dir_path_args(parser):
         help="Use defaults for a given HPC cluster to use. Currently, only "
         "UChicago Midway2 (run on user scratch) is implemented.",
     )
-    cluster.add_argument(
+
+    parser.add_argument(
         "--userid",
         type=str,
         nargs=1,
