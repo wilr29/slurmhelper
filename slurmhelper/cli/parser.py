@@ -417,7 +417,7 @@ def build_parser():
     # create the parser for the "SUBMIT" command
     # -----------------------------------------------------------------------
     submit = subparsers.add_parser("submit", help="submit an sbatch job nicely")
-    submit = add_parser_options(submit, "wd", "sbatch-id")
+    submit = add_parser_options(submit, "wd", "spec", "sbatch-id")
 
     # create the parser for the "COPY" command
     # -----------------------------------------------------------------------
