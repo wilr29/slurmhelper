@@ -273,7 +273,7 @@ def check_completed(
             pretty_print_job_ids(no_logs_ids.sort())
         if len(failed_job_ids) > 0:
             print(f"\nfailed jobs (n = {len(failed_job_ids)}):")
-            pretty_print_job_ids(failed_job_ids)
+            pretty_print_job_ids(failed_job_ids.sort())
 
             if failed_report:
                 print(pretty_cli_header("job logs", "*", n_cols=60, start_newline=True, end_newline=True))
