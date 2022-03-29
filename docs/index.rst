@@ -10,6 +10,7 @@
    :hidden:
 
    usage
+   todos
    spec_guidelines
    guide
    example
