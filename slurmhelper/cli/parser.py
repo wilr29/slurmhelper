@@ -82,7 +82,7 @@ def valid_folder_type(x):
 
 
 def add_sbatch_id_arg(parser):
-    parser = parser.add_argument(
+    parser.add_argument(
         "--sbatch-id",
         "--sbatch_id",
         "-s",
