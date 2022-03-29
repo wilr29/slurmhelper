@@ -270,7 +270,7 @@ def check_completed(
         )
         if len(no_logs_ids) > 0:
             print(f"\njobs without logfiles (n = {len(no_logs_ids)})")
-            pretty_print_job_ids(no_logs_ids)
+            pretty_print_job_ids(no_logs_ids.sort())
         if len(failed_job_ids) > 0:
             print(f"\nfailed jobs (n = {len(failed_job_ids)}):")
             pretty_print_job_ids(failed_job_ids)
@@ -280,7 +280,8 @@ def check_completed(
 
                 failed_jobs = list(
                     filter(lambda x: str(x) in failed_job_ids, with_logs)
-                )
+                ).sort()
+
                 for job in failed_jobs:
                     job.print_job_log()
                     print(" ")
@@ -366,14 +367,14 @@ def check_runs(job_list, dirs, args, config):
         print("{num} valid jobs found.".format(num=len(valid)))
         if args.verbose:
             print("these jobs are:")
-            print(valid)
+            print(valid.sort())
     else:
         print("No valid jobs found :(")
 
     if len(not_valid) > 0:
         print("{num} NOT VALID / FLAGGED jobs found.".format(num=len(not_valid)))
         print("these jobs are:")
-        print(not_valid)
+        print(not_valid.sort())
     else:
         print("No flagged/invalid jobs! YAY :)")
 
