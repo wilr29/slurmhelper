@@ -82,6 +82,18 @@ def valid_folder_type(x):
         )
     return x
 
+def add_sbatch_id_arg(parser):
+    parser.add_argument(
+        "--sbatch-id",
+        "--sbatch_id",
+        "-s",
+        type=int,
+        nargs=1,
+        help="Specify an sbatch job id, to identify the "
+             "submission script to be created.",
+        required=True,
+    )
+    return parser
 
 def add_sbatch_args(parser):
     """
@@ -90,6 +102,7 @@ def add_sbatch_args(parser):
     :param parser: subcommand parser object
     :return: parser (enhanced with new arguments!)
     """
+    parser = add_sbatch_id_arg(parser)
     parser.add_argument(
         "--time",
         "-t",
@@ -116,16 +129,6 @@ def add_sbatch_args(parser):
         action="store",
         default=[16000],
         help="Memory (in mb) to request",
-    )
-    parser.add_argument(
-        "--sbatch-id",
-        "--sbatch_id",
-        "-s",
-        type=int,
-        nargs=1,
-        help="Specify an sbatch job id, to identify the "
-        "submission script to be created.",
-        required=True,
     )
     parser.add_argument(
         "--no-header",
@@ -317,7 +320,7 @@ def add_parser_options(parser, *args):
     :param parser: subcommand parser object
     :return: parser (enhanced with new arguments!)
     """
-    allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc"}
+    allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc", 'sbatch-id'}
     opts = set(args)
 
     if not opts.issubset(allowed):
@@ -325,9 +328,6 @@ def add_parser_options(parser, *args):
 
     if "wd" in opts:
         parser = add_work_dir_path_args(parser)
-
-    if "sbatch" in opts:
-        parser = add_sbatch_args(parser)
 
     if "ids" in opts:
         parser = add_ids_args(parser, required=True)
@@ -337,6 +337,12 @@ def add_parser_options(parser, *args):
 
     if "spec" in opts:
         parser = add_spec_args(parser)
+
+    # mutually exclusive:
+    if 'sbatch-id' in opts:
+        parser = add_sbatch_id_arg(parser)
+    elif 'sbatch' in opts:
+        parser = add_sbatch_args(parser)
 
     # by default, always add logging
     parser = add_logging_args(parser)
@@ -396,6 +402,11 @@ def build_parser():
     # -----------------------------------------------------------------------
     list = subparsers.add_parser("list", help="print a list of existing scripts")
     list = add_parser_options(list, "wd")
+
+    # create the parser for the "SUBMIT" command
+    # -----------------------------------------------------------------------
+    submit = subparsers.add_parser("submit", help="submit an sbatch job nicely")
+    submit = add_parser_options(list, "wd", 'sbatch-id')
 
     # create the parser for the "COPY" command
     # -----------------------------------------------------------------------

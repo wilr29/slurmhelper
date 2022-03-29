@@ -190,6 +190,11 @@ class SlurmhelperCLI:
             print("The --full flag was used, so scripts will now be generated.")
             self.gen_scripts()  # generate template scripts for all jobs
 
+    def submit(self):
+        from ..jobs.submit import submit_sbatch
+        sb_id = self.args.sbatch_id[0]
+        submit_sbatch(sb_id, self.paths)
+
     def list(self):
         list_slurm(self.paths)
 

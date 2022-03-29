@@ -54,6 +54,7 @@ def calculate_directories(basepath, base_dir_name):
         "job_logs": os.path.join(base, "logs", "jobs"),
         "job_inputs": os.path.join(base, "inputs"),
         "job_work": os.path.join(base, "work"),
+        "crashes" : os.path.join(base, "crashes")
     }
 
 
