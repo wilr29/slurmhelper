@@ -33,6 +33,8 @@ def submit_sbatch(id, dirs):
         encoding="UTF-8",
         cwd=str(from_path),  # run from the pertinent crashes dir, so things are neat
     )
+    print(type(cmd_output))
+    print(cmd_output)
 
     # cmd_output should yield:
     # "Submitted batch job 18860277"
