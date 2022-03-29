@@ -8,8 +8,8 @@ spec_version: '2022-03-16'
 
 # All run script templates will be pre-formatted with these parameters.
 script_global_settings: {
-                          n_thr: 8,
-                          mem_mb: 15000,
+                          n_thr: 7,
+                          mem_mb: 20000,
                           fd_thr: 0.3,
                           path_matlab: '/software/matlab-2020b-el7-x86_64/bin/matlab',
                           path_spm: '/home/fcmeyer/scratch-midway2/spm12'
