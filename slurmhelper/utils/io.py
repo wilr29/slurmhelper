@@ -54,7 +54,7 @@ def calculate_directories(basepath, base_dir_name):
         "job_logs": os.path.join(base, "logs", "jobs"),
         "job_inputs": os.path.join(base, "inputs"),
         "job_work": os.path.join(base, "work"),
-        "crashes" : os.path.join(base, "crashes")
+        "crashes": os.path.join(base, "crashes"),
     }
 
 
@@ -133,9 +133,7 @@ def copy_or_clean(job_list, operation, path_scripts):
     :param path_scripts: where do we expect to find the scripts generated from R (abs path)
     :return: nothin', just some good ol' stuff done via bash
     """
-    if not (
-        operation == "copy" or operation == "clean"
-    ):
+    if not (operation == "copy" or operation == "clean"):
         raise AssertionError("invalid operation specified: %s" % (operation))
     logger.info("========== BEGIN DOING STUFF ==========")
     for i in progressbar.progressbar(range(len(job_list)), redirect_stdout=True):

@@ -86,7 +86,7 @@ def build_job_objects(dirs, config, job_list=None):
     jobs_g = [{**row, **config["script_global_settings"]} for row in jobs]
 
     # If a custom vars function is provided in the YAML file, load it
-    #if "compute_custom_vars" in config.keys():
+    # if "compute_custom_vars" in config.keys():
     #    exec(config["compute_custom_vars"])  # overwrites the template function obj (?)
 
     # Enhance even more, with computed variables...
@@ -96,7 +96,7 @@ def build_job_objects(dirs, config, job_list=None):
         jd = compute_helpful_vars(job, dirs)
 
         # If a custom var computation function is provided in the YAML file, run it
-        #if "compute_custom_vars" in config.keys():
+        # if "compute_custom_vars" in config.keys():
         #    jd = compute_custom_vars(jd, dirs)
 
         # Append to our list

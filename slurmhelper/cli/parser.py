@@ -26,8 +26,6 @@ def valid_time(x):
     return x
 
 
-
-
 def built_in_spec_type(x):
     """
     Definition for valid built-in specs
@@ -82,18 +80,20 @@ def valid_folder_type(x):
         )
     return x
 
+
 def add_sbatch_id_arg(parser):
-    parser.add_argument(
+    parser = parser.add_argument(
         "--sbatch-id",
         "--sbatch_id",
         "-s",
         type=int,
         nargs=1,
         help="Specify an sbatch job id, to identify the "
-             "submission script to be created.",
+        "submission script to be created.",
         required=True,
     )
     return parser
+
 
 def add_sbatch_args(parser):
     """
@@ -188,17 +188,10 @@ def add_work_dir_path_args(parser):
     :return: parser (enhanced with new arguments!)
     """
 
+    this_parser = parser
     # base folder
-    base_folder = parser.add_mutually_exclusive_group(required=True)
-    base_folder.add_argument(
-        "--cluster",
-        type=str,
-        nargs=1,
-        choices=["midway2-scratch"],
-        action="store",
-        help="Use defaults for a given HPC cluster to use. Currently, only "
-        "UChicago Midway2 (run on user scratch) is implemented.",
-    )
+    base_folder = this_parser.add_mutually_exclusive_group(required=True)
+
     base_folder.add_argument(
         "--wd-path",
         "--wd_path",
@@ -210,18 +203,30 @@ def add_work_dir_path_args(parser):
         "(less efficient...), or for testing",
     )
 
-    parser.add_argument(
+    cluster = base_folder.add_argument_group()
+    cluster.add_argument(
+        "--cluster",
+        type=str,
+        nargs=1,
+        choices=["midway2-scratch"],
+        action="store",
+        help="Use defaults for a given HPC cluster to use. Currently, only "
+             "UChicago Midway2 (run on user scratch) is implemented.",
+    )
+    cluster.add_argument(
         "--userid",
         type=str,
         nargs=1,
         action="store",
         help="User ID (e.g., CNetID at UChicago) of the person using this. "
-        "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
-        "to scratch where the pre-fabricated bash "
-        "scripts are being stored. Ignored otherwise.",
+             "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
+             "to scratch where the pre-fabricated bash "
+             "scripts are being stored. Ignored otherwise.",
     )
 
-    return parser
+
+
+    return this_parser
 
 
 def add_spec_args(parser):
@@ -320,7 +325,16 @@ def add_parser_options(parser, *args):
     :param parser: subcommand parser object
     :return: parser (enhanced with new arguments!)
     """
-    allowed = {"wd", "spec", "dry", "sbatch", "ids", "ids-optional", "do-cc", 'sbatch-id'}
+    allowed = {
+        "wd",
+        "spec",
+        "dry",
+        "sbatch",
+        "ids",
+        "ids-optional",
+        "do-cc",
+        "sbatch-id",
+    }
     opts = set(args)
 
     if not opts.issubset(allowed):
@@ -339,9 +353,9 @@ def add_parser_options(parser, *args):
         parser = add_spec_args(parser)
 
     # mutually exclusive:
-    if 'sbatch-id' in opts:
+    if "sbatch-id" in opts:
         parser = add_sbatch_id_arg(parser)
-    elif 'sbatch' in opts:
+    elif "sbatch" in opts:
         parser = add_sbatch_args(parser)
 
     # by default, always add logging
@@ -406,7 +420,7 @@ def build_parser():
     # create the parser for the "SUBMIT" command
     # -----------------------------------------------------------------------
     submit = subparsers.add_parser("submit", help="submit an sbatch job nicely")
-    submit = add_parser_options(list, "wd", 'sbatch-id')
+    submit = add_parser_options(list, "wd", "sbatch-id")
 
     # create the parser for the "COPY" command
     # -----------------------------------------------------------------------

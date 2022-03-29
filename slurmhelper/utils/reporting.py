@@ -18,21 +18,25 @@ from ..jobs.utils import build_job_objects
 
 logger = logging.getLogger("cli")
 
-def pretty_cli_header(str,pad_char, n_cols=60,start_newline=True,end_newline=True):
-    start=''
-    end=''
+
+def pretty_cli_header(str, pad_char, n_cols=60, start_newline=True, end_newline=True):
+    start = ""
+    end = ""
 
     if start_newline:
-        start="\n" + pad_char
+        start = "\n" + pad_char
 
     if end_newline:
-        end='\n' + pad_char
+        end = "\n" + pad_char
 
-    rv = [start.ljust(n_cols, pad_char),
-          f"{pad_char} {str} ".ljust(n_cols, pad_char),
-          "".ljust(n_cols, pad_char).join(end)]
+    rv = [
+        start.ljust(n_cols, pad_char),
+        f"{pad_char} {str} ".ljust(n_cols, pad_char),
+        "".ljust(n_cols, pad_char).join(end),
+    ]
 
-    return '\n'.join(rv)
+    return "\n".join(rv)
+
 
 def list_slurm(dirs):
     """
@@ -275,7 +279,11 @@ def check_completed(
             pretty_print_job_ids(sorted(failed_job_ids))
 
             if failed_report:
-                print(pretty_cli_header("job logs", "*", n_cols=60, start_newline=True, end_newline=True))
+                print(
+                    pretty_cli_header(
+                        "job logs", "*", n_cols=60, start_newline=True, end_newline=True
+                    )
+                )
 
                 failed_jobs = list(
                     filter(lambda x: str(x) in failed_job_ids, with_logs)

@@ -37,7 +37,6 @@ def get_builtin_specs():
             dates = list(filter(datetime_valid, spec_dict[spec]["versions"]))
             spec_dict[spec]["latest"] = get_latest_date(dates)
 
-
     return spec_dict
 
 

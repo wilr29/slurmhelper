@@ -135,7 +135,8 @@ class Job:
         )
         if len(fields_rm) > 0:
             logger.debug(
-                "These are: %s", (" ".join(["'{s}'".format(s=s) for s in fields_rm])))
+                "These are: %s", (" ".join(["'{s}'".format(s=s) for s in fields_rm]))
+            )
 
         dd = copy.deepcopy(self._jd)
 
@@ -153,7 +154,11 @@ class Job:
             set([i[1] for i in Formatter().parse(script_template) if i[1] is not None])
         )
         logger.debug(
-            "Template for %s requires %d unique parameters:  %s", operation, len(set(fields)), " ".join(list(set(fields))))
+            "Template for %s requires %d unique parameters:  %s",
+            operation,
+            len(set(fields)),
+            " ".join(list(set(fields))),
+        )
 
         # Generate a dictionary with required parameters only
         fmt_dict = self._clean_params(fields, verbose)
@@ -219,7 +224,9 @@ class Job:
     def _write(self, operation):
         p = Path(self._basedirs["job_scripts"])  # target path
         if not p.exists():
-            raise AssertionError("target folder does not exist! ensure you initialize dir !")
+            raise AssertionError(
+                "target folder does not exist! ensure you initialize dir !"
+            )
         with open(p.joinpath(self._script_names[operation]), "w") as writer:
             logger.info(
                 "Writing job {id} {op} script to {path}".format(
@@ -399,9 +406,7 @@ class TestableJob(Job):
                 print(self._tests_results)
 
     def _update_valid(self):
-        results = [
-            self._tests_results[test]["result"] for test in self._tests_results
-        ]
+        results = [self._tests_results[test]["result"] for test in self._tests_results]
         self.is_valid = all(results)
 
     def get_results_list(self):

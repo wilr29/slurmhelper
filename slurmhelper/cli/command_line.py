@@ -192,6 +192,7 @@ class SlurmhelperCLI:
 
     def submit(self):
         from ..jobs.submit import submit_sbatch
+
         sb_id = self.args.sbatch_id[0]
         submit_sbatch(sb_id, self.paths)
 
