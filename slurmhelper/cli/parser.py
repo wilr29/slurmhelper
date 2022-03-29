@@ -188,9 +188,8 @@ def add_work_dir_path_args(parser):
     :return: parser (enhanced with new arguments!)
     """
 
-    this_parser = parser
     # base folder
-    base_folder = this_parser.add_mutually_exclusive_group(required=True)
+    base_folder = parser.add_mutually_exclusive_group(required=True)
 
     base_folder.add_argument(
         "--wd-path",
@@ -211,7 +210,7 @@ def add_work_dir_path_args(parser):
         choices=["midway2-scratch"],
         action="store",
         help="Use defaults for a given HPC cluster to use. Currently, only "
-             "UChicago Midway2 (run on user scratch) is implemented.",
+        "UChicago Midway2 (run on user scratch) is implemented.",
     )
     cluster.add_argument(
         "--userid",
@@ -219,14 +218,12 @@ def add_work_dir_path_args(parser):
         nargs=1,
         action="store",
         help="User ID (e.g., CNetID at UChicago) of the person using this. "
-             "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
-             "to scratch where the pre-fabricated bash "
-             "scripts are being stored. Ignored otherwise.",
+        "Required for some clusters (e.g., in midway2-scratch, to calculate the path "
+        "to scratch where the pre-fabricated bash "
+        "scripts are being stored. Ignored otherwise.",
     )
 
-
-
-    return this_parser
+    return parser
 
 
 def add_spec_args(parser):
