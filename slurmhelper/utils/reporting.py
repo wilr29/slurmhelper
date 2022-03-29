@@ -43,7 +43,6 @@ def list_slurm(dirs):
     """
     sbatch_files = glob.glob(os.path.join(dirs["slurm_scripts"], "sb-????.sh"))
     found_sbatch = [re.search("sb-(.+?).sh", x).group(1) for x in sbatch_files]
-    found_sbatch.sort()
     if not found_sbatch:
         raise Exception(
             "No valid sbatch scripts found in your directory... whats up with that???"
@@ -55,7 +54,7 @@ def list_slurm(dirs):
             )
         )
         print("These scripts have the following ids:")
-        print(found_sbatch)
+        print(sorted(found_sbatch))
 
     # now check for arrays
     sbatch_arrays = glob.glob(os.path.join(dirs["slurm_scripts"], "sb-????-???.sh"))
@@ -270,19 +269,19 @@ def check_completed(
         )
         if len(no_logs_ids) > 0:
             print(f"\njobs without logfiles (n = {len(no_logs_ids)})")
-            pretty_print_job_ids(no_logs_ids.sort())
+            pretty_print_job_ids(sorted(no_logs_ids))
         if len(failed_job_ids) > 0:
             print(f"\nfailed jobs (n = {len(failed_job_ids)}):")
-            pretty_print_job_ids(failed_job_ids.sort())
+            pretty_print_job_ids(sorted(failed_job_ids))
 
             if failed_report:
                 print(pretty_cli_header("job logs", "*", n_cols=60, start_newline=True, end_newline=True))
 
                 failed_jobs = list(
                     filter(lambda x: str(x) in failed_job_ids, with_logs)
-                ).sort()
+                )
 
-                for job in failed_jobs:
+                for job in sorted(failed_jobs):
                     job.print_job_log()
                     print(" ")
             else:
@@ -367,14 +366,14 @@ def check_runs(job_list, dirs, args, config):
         print("{num} valid jobs found.".format(num=len(valid)))
         if args.verbose:
             print("these jobs are:")
-            print(valid.sort())
+            print(sorted(valid))
     else:
         print("No valid jobs found :(")
 
     if len(not_valid) > 0:
         print("{num} NOT VALID / FLAGGED jobs found.".format(num=len(not_valid)))
         print("these jobs are:")
-        print(not_valid.sort())
+        print(sorted(not_valid))
     else:
         print("No flagged/invalid jobs! YAY :)")
 
