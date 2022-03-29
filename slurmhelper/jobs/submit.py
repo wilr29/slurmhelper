@@ -11,7 +11,7 @@ def submit_sbatch(id, dirs):
     import subprocess
     import os
 
-    script_to_submit = Path(dirs["slurm_scripts"]).join(f"sb-{str(id).zfill(4)}.sh")
+    script_to_submit = Path(dirs["slurm_scripts"]) / f"sb-{str(id).zfill(4)}.sh"
     if not script_to_submit.exists():
         raise FileNotFoundError(
             f"Script for sbatch_id {id} not found\n\t(expected: {str(script_to_submit)})"
@@ -25,7 +25,7 @@ def submit_sbatch(id, dirs):
 
     # create directory from which we submit this
     # wd/crashes/sb-####/
-    from_path = from_path.join(f"sb-{str(id).zfill(4)}")
+    from_path = from_path / f"sb-{str(id).zfill(4)}"
     from_path.mkdir(parents=True, exist_ok=True)
 
     cmd_output = subprocess.check_output(
