@@ -33,14 +33,16 @@ def submit_sbatch(id, dirs):
         encoding="UTF-8",
         cwd=str(from_path),  # run from the pertinent crashes dir, so things are neat
     )
-    print(type(cmd_output))
-    print(cmd_output)
 
-    # cmd_output should yield:
-    # "Submitted batch job 18860277"
+    # Output looks like this: 'Submitted batch job 18334739\n'
+    slurm_id = cmd_output.strip().replace("Submitted batch job ", "")
 
-    # TODO: parse this so that the sbatch id is correctly extracted. Then, this can be integrated
-    #       to an internal database such that we now know what slurm job id corresponds with our internal
+    print(
+        f"Sbatch job sb-{str(id).zfill(4)}.sh submitted.\n"
+        f"The Slurm ID for this job (seen in squeue) is {slurm_id}."
+    )
+
+    # TODO: Save this sbatch_id and slurm_id crosswalk to an internal database, allowing us to track what slurm job id corresponds with our internal
     #       sbatch_id.
 
     return cmd_output
