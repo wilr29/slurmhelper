@@ -77,7 +77,7 @@ class SlurmhelperCLI:
         # Compile job list, if required
         # below are the exceptions where one wouldn't need a job list:
         if not (
-            (args.operation in {"list", "init"})
+            (args.operation in {"list", "init", "submit"})
             or (
                 args.operation == "gen-scripts"
                 and args.ids is None
