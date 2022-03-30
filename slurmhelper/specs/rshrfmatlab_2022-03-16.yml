@@ -191,7 +191,8 @@ job_ramp_up_time: {
                     minutes: 4
 }
 job_time: {
-            minutes: 27
+            hours: 1,
+            minutes: 18
 }
 max_job_time: {
                 hours: 22,

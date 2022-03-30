@@ -509,3 +509,337 @@ class TestableJob(Job):
         # update validity if applicable
         self._tests_ran = True
         self._update_valid()
+
+
+class __SbatchJob:
+    """
+    Initializes an SbatchJob object
+    """
+
+    def __init__(self, sbatch_id: int, spec: dict, dirs: dict, job_list: list):
+
+        self.__sbatch_id = (
+            sbatch_id  # an integer; see __str__ definition for nice print
+        )
+        self.script = None
+        self.spec = spec
+        self.dirs = dirs
+        self.jobs = {str(job): job for job in job_list}
+
+    def __str__(self):
+        raise NotImplementedError("Should not be using this class directly!")
+
+    def __repr__(self):
+        raise NotImplementedError("Should not be using this class directly!")
+
+    @property
+    def script_filename(self):
+        return f"sb-{str(self)}.sh"
+
+    @property
+    def log_file(self):
+        from pathlib import Path
+
+        return Path(self.dirs["slurm_logs"]) / f"{str(self)}.txt"
+
+    @property
+    def submitted(self):
+        return self.slurm_id is not None
+
+    @property
+    def n_jobs(self):
+        return len(self.__jobs.keys())
+
+    @property
+    def job_ids(self):
+        return [job for job in self.__jobs.keys()]
+
+    @property
+    def job_list(self):
+        """
+        Returns a copy of the job objects in here
+        :return:
+        """
+        from copy import deepcopy
+
+        return deepcopy(self.__jobs)
+
+    def __get_arr_line(self):
+        """
+        Indicates the array line for the sbatch script`
+        :return: a string
+        """
+        raise NotImplementedError(
+            "You should not be calling this class directly."
+            "Please define this method in your derived classes."
+        )
+
+    def __build_script_header(self, args):
+
+        from ..utils.time import calculate_wall_time
+
+        if args.time is not None:  # use manually specified time
+            time = args.time
+        else:  # calculate wall time using our current assumptions
+            time = calculate_wall_time(len(self.jobs.keys()), self.spec)
+
+        # Figure out the log path
+        log_out = self.log_file
+        hdr = Template(self.spec["header"]).safe_substitute(
+            job_name=str(self),
+            log_path=log_out,
+            n_tasks=args.n_tasks[0],
+            mem=args.memory[0],
+            time=time,
+            job_array=self.__get_arr_line(),
+        )
+        header_f = "\n".join([hdr, self.spec["preamble"]])
+
+        self._script_header = header_f
+
+    def __build_job_calls(self):
+        # Ok, let's create the section where we call each job script.
+        script_call = "bash {target_path} 2>&1 | tee {job_log_path}"
+
+        job_calls = []
+        for job_id in self.jobs.keys():
+            script_name = "{job_id:05d}_run.sh".format(job_id=job_id)
+            target_path = os.path.join(self.dirs["job_scripts"], script_name)
+            job_log_path = os.path.join(
+                self.dirs["job_logs"], "{job_id:05d}.txt".format(job_id=job_id)
+            )
+            job_calls.append(
+                script_call.format(target_path=target_path, job_log_path=job_log_path)
+            )
+
+        return "\n".join(job_calls)
+
+    def build_script(self, args):
+        header = self.__build_script_header(args)
+        job_calls = self.__build_job_calls()
+
+        self.script = "\n\n".join(
+            [
+                header,
+                job_calls,
+                '''echo "~~~~~~~~~~~~~ END SLURM JOB ~~~~~~~~~~~~~~"''',
+                "exit",
+            ]
+        )
+
+    def write_script(self):
+        if self.script is None:
+            raise KeyError("Script has not been generated yet!")
+        else:
+            tgt_path = Path(self.dirs["slurm_scripts"]) / self.script_filename
+            if tgt_path.exists():
+                raise FileExistsError(
+                    f"A script already exists in the intended write location:"
+                    f" {str(tgt_path)}. Please use a different sbatch_id to avoid problems."
+                )
+            else:
+                with open(tgt_path, "w") as f:
+                    f.write(self.script)
+                    logger.info(f"Wrote file: {tgt_path}")
+
+    def set_up(self, args):
+        # If not exist, generate scripts.
+        # <CODE>
+        # If indicated, do reset/clean/clear
+        # <CODE>
+        # Build and write wrapper script
+        self.build_script(args)
+        if "dry" in args and not args.dry:
+            self.write_script(args)
+
+
+class __SubmittableSbatchJob(__SbatchJob):
+    """
+    Extends SbatchJob with a submit method.
+    """
+
+    def __init__(self, sbatch_id: int, spec: dict, dirs: dict, job_list: list):
+        super().__init__(sbatch_id, spec, dirs, job_list)
+
+        self.slurm_id = None
+
+    @property
+    def submitted(self):
+        return self.slurm_id is not None
+
+    def submit(self):
+        """
+        Helper function to submit sbatch scripts. It does so from a "crashes" file, such that any
+        nipype related crash files would dump to a "crashes" directory corresponding to the sbatch submission.
+        This hopefully makes debugging a bit easier?
+        :param id: sbatch_id (int)
+        :param dirs: dirs dictionary generated by calculate_directories.
+        :return:
+        """
+        # Should not run directly on array elements!
+
+        from pathlib import Path
+        import subprocess
+
+        if self.array_element:
+            raise NotImplementedError(
+                "You should NOT be calling this on an array element!"
+                " For the moment, a wrapper thingy is not implemented..."
+            )
+
+        script_to_submit = (
+            Path(self.dirs["slurm_scripts"]) / f"sb-{str(id).zfill(4)}.sh"
+        )
+        if not script_to_submit.exists():
+            raise FileNotFoundError(
+                f"Script for sbatch_id {id} not found\n\t(expected: {str(script_to_submit)})"
+            )
+
+        from_path = Path(self.dirs["crashes"])
+        if not from_path.exists():
+            raise FileNotFoundError(
+                "Crashes directory not found. Did you initialize this wd correctly?"
+            )
+
+        # create directory from which we submit this
+        # wd/crashes/sb-####/
+        from_path = from_path / f"sb-{str(id).zfill(4)}"
+        from_path.mkdir(parents=True, exist_ok=True)
+
+        cmd_output = subprocess.check_output(
+            ["sbatch", str(script_to_submit)],
+            encoding="UTF-8",
+            cwd=str(
+                from_path
+            ),  # run from the pertinent crashes dir, so things are neat
+        )
+
+        # Output looks like this: 'Submitted batch job 18334739\n'
+        try:
+            slurm_id = cmd_output.strip().replace("Submitted batch job ", "")
+        except Exception as err:
+            logger.critical(str(err))
+            print(err)
+
+        self.slurm_id = slurm_id
+
+        print(
+            f"Sbatch job sb-{str(id).zfill(4)}.sh submitted.\n"
+            f"The Slurm ID for this job (seen in squeue) is {slurm_id}."
+        )
+
+
+class SbatchStandalone(__SubmittableSbatchJob):
+    """
+    Extends SubmittableSbatchJob, sets up in such a way that
+    it makes it usable for generating scripts, etc.
+    """
+
+    def __init__(self, sbatch_id: int, spec: dict, dirs: dict, job_list: list):
+        super().__init__(sbatch_id, spec, dirs, job_list)
+
+    @property
+    def id(self):
+        return self.__id
+
+    def __str__(self):
+        return f"{str(self.id).zfill(4)}"
+
+    def __repr__(self):
+        return f"StandaloneSbatchJob sb-{self.__str__()}"
+
+    def __get_arr_line(self):
+        return ""
+
+
+class SbatchArrayElement(__SbatchJob):
+    def __init__(
+        self, sbatch_id: int, spec: dict, dirs: dict, job_list: list, array_index: int
+    ):
+
+        super().__init__(sbatch_id, spec, dirs, job_list)
+
+        # Check if it is an array.
+        if isinstance(array_index, int):
+            self.array_index = array_index
+        else:
+            raise ValueError(
+                f"Array index value should be an integer. "
+                f"You provided: {array_index}"
+            )
+
+    def __str__(self):
+        return "%04d-%d" % self.id
+
+    def __repr__(self):
+        return f"SbatchArrayElement sb-{self.__str__()}"
+
+    def __build_script_header(self):
+        self._script_heaader = "\n".join(["""#!/bin/bash -e""", self.spec["preamble"]])
+
+    @property
+    def id(self):
+        return (self.__sbatch_id, self.array_index)
+
+
+class SbatchArray(__SubmittableSbatchJob):
+    def __init__(
+        self,
+        sbatch_id: int,
+        spec: dict,
+        dirs: dict,
+        job_list: list,
+        n_parcels: int,
+        step=None,
+    ):
+
+        super().__init__(sbatch_id, spec, dirs, job_list)
+
+        self.__initialize_elements(sbatch_id, spec, dirs, job_list)
+
+        self.__start_index = 100
+        self.__end_index = 100 + n_parcels - 1
+        self.__step = step
+
+    @property
+    def id(self):
+        return self.__id
+
+    @property
+    def n_elements(self):
+        """
+        How many sub-sbatchs in array
+        :return:
+        """
+        return len(self.elements.keys())
+
+    @property
+    def n_jobs(self):
+        """
+        Total number of job units within array
+        :return:
+        """
+        return sum([self.elements[element].n_jobs for element in self.elements.keys()])
+
+    def __str__(self):
+        return f"{str(self.id).zfill(4)}"
+
+    def __repr__(self):
+        return f"SbatchArray sb-{self.__str__()} ({self.n_elements} elements)"
+
+    def __initialize_elements(self):
+        """
+        Array helper - initializes elements too! :)
+        :return:
+        """
+        # Divide job list into correct parcel thingys
+        # Create dict with keys (elements) of length (n_parcels), with sbatchArrayelements in them.)
+        self.elements = dict()
+        # TODO: wrap this up
+        pass
+
+    def __get_arr_line(self):
+        rv = f"#SBATCH --array={self.start_index}-{self.end_index}"
+        if self.__step is not None:
+            rv = "%".join([rv, self.__step])
+        return rv
