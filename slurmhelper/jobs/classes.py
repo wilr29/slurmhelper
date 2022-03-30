@@ -789,17 +789,17 @@ class SbatchArray(__SubmittableSbatchJob):
         spec: dict,
         dirs: dict,
         job_list: list,
-        n_parcels: int,
+        parallel=50,
         step=None,
     ):
+        self.__validate_optional_args(parallel=parallel, step=step)
 
         super().__init__(sbatch_id, spec, dirs, job_list)
 
-        self.__initialize_elements(sbatch_id, spec, dirs, job_list)
-
-        self.__start_index = 100
-        self.__end_index = 100 + n_parcels - 1
+        self.__parallel = parallel
         self.__step = step
+
+        self.__initialize_elements(parallel)
 
     @property
     def id(self):
@@ -812,6 +812,14 @@ class SbatchArray(__SubmittableSbatchJob):
         :return:
         """
         return len(self.elements.keys())
+
+    @property
+    def range(self):
+        '''
+        Indices for filling in
+        :return: tuple, start index, end index
+        '''
+        return (min(self.elements.keys()), max(self.elements.keys()))
 
     @property
     def n_jobs(self):
@@ -827,16 +835,43 @@ class SbatchArray(__SubmittableSbatchJob):
     def __repr__(self):
         return f"SbatchArray sb-{self.__str__()} ({self.n_elements} elements)"
 
-    def __initialize_elements(self):
+    def __validate_optional_args(self, **kwargs):
+        for arg in kwargs.keys():
+            if kwargs[arg] is not None and not isinstance(kwargs[arg],int):
+                raise ValueError(f"Input argument {arg} should be left as None, or be an integer value.")
+
+    def __n_parcels(self, parallel):
+        '''
+        Identify the optimal number of parcels to use.
+        :param strategy: str, one of: {'even','pro_array','pro_serial'}
+            - even: attempt to split jobs into parcels that
+        :return:
+        '''
+        from slurmhelper.utils.time import calculate_min_number_of_parcels
+        from slurmhelper.utils.misc import find_optimal_n_parcels
+
+        if not isinstance(parallel, int) and parallel >= 0 and parallel <= 100:
+            raise ValueError("parallel should be an integer with value between 0 and 100.")
+
+        n_jobs = len(self.jobs.keys())
+        n_parcels_min = calculate_min_number_of_parcels(n_jobs, self.spec)
+        return find_optimal_n_parcels(n_jobs, n_parcels_min, parallel)
+
+    def __initialize_elements(self, parallel=50):
         """
         Array helper - initializes elements too! :)
         :return:
         """
-        # Divide job list into correct parcel thingys
-        # Create dict with keys (elements) of length (n_parcels), with sbatchArrayelements in them.)
-        self.elements = dict()
-        # TODO: wrap this up
-        pass
+        from slurmhelper.utils.misc import split_list
+
+        # How many parcels to use?
+        n_parcels = self.__n_parcels(parallel)
+        element_list = split_list(self.job_list, wanted_parts = n_parcels)
+
+        # Create dict with keys (elements) of length (n_parcels), with sbatchArrayelements in them.
+        self.elements = {ind+100 : SbatchArrayElement(sbatch_id=self.sbatch_id, spec=self.spec,
+                                                      dirs=self.dirs, job_list=jl, array_index=ind+100)
+                         for (ind,jl) in enumerate(element_list)}
 
     def __get_arr_line(self):
         rv = f"#SBATCH --array={self.start_index}-{self.end_index}"
