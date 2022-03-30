@@ -815,10 +815,10 @@ class SbatchArray(__SubmittableSbatchJob):
 
     @property
     def range(self):
-        '''
+        """
         Indices for filling in
         :return: tuple, start index, end index
-        '''
+        """
         return (min(self.elements.keys()), max(self.elements.keys()))
 
     @property
@@ -837,21 +837,25 @@ class SbatchArray(__SubmittableSbatchJob):
 
     def __validate_optional_args(self, **kwargs):
         for arg in kwargs.keys():
-            if kwargs[arg] is not None and not isinstance(kwargs[arg],int):
-                raise ValueError(f"Input argument {arg} should be left as None, or be an integer value.")
+            if kwargs[arg] is not None and not isinstance(kwargs[arg], int):
+                raise ValueError(
+                    f"Input argument {arg} should be left as None, or be an integer value."
+                )
 
     def __n_parcels(self, parallel):
-        '''
+        """
         Identify the optimal number of parcels to use.
         :param strategy: str, one of: {'even','pro_array','pro_serial'}
             - even: attempt to split jobs into parcels that
         :return:
-        '''
+        """
         from slurmhelper.utils.time import calculate_min_number_of_parcels
         from slurmhelper.utils.misc import find_optimal_n_parcels
 
         if not isinstance(parallel, int) and parallel >= 0 and parallel <= 100:
-            raise ValueError("parallel should be an integer with value between 0 and 100.")
+            raise ValueError(
+                "parallel should be an integer with value between 0 and 100."
+            )
 
         n_jobs = len(self.jobs.keys())
         n_parcels_min = calculate_min_number_of_parcels(n_jobs, self.spec)
@@ -866,12 +870,20 @@ class SbatchArray(__SubmittableSbatchJob):
 
         # How many parcels to use?
         n_parcels = self.__n_parcels(parallel)
-        element_list = split_list(self.job_list, wanted_parts = n_parcels)
+        element_list = split_list(self.job_list, wanted_parts=n_parcels)
 
         # Create dict with keys (elements) of length (n_parcels), with sbatchArrayelements in them.
-        self.elements = {ind+100 : SbatchArrayElement(sbatch_id=self.sbatch_id, spec=self.spec,
-                                                      dirs=self.dirs, job_list=jl, array_index=ind+100)
-                         for (ind,jl) in enumerate(element_list)}
+        self.elements = {
+            ind
+            + 100: SbatchArrayElement(
+                sbatch_id=self.sbatch_id,
+                spec=self.spec,
+                dirs=self.dirs,
+                job_list=jl,
+                array_index=ind + 100,
+            )
+            for (ind, jl) in enumerate(element_list)
+        }
 
     def __get_arr_line(self):
         rv = f"#SBATCH --array={self.start_index}-{self.end_index}"
