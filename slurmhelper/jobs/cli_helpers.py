@@ -128,7 +128,7 @@ def prep_job_array(config, job_list, paths, args):
     if args.n_parcels is not None:
         n_parcels = args.n_parcels[0]
     else:
-        n_parcels = calculate_min_number_of_parcels(len(job_list))
+        n_parcels = calculate_min_number_of_parcels(len(job_list), config)
 
     # divvy up my jobs evenly
     job_array = split_list(job_list, wanted_parts=n_parcels)
