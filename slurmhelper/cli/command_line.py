@@ -13,6 +13,7 @@ from ..jobs.cli_helpers import prep_job, prep_job_array, generate_run_scripts
 from ..utils.io import (
     calculate_directories,
     calculate_directories_midwayscratch,
+    calculate_directories_amarel,
     copy_or_clean,
     initialize_directories,
     is_valid_db,
